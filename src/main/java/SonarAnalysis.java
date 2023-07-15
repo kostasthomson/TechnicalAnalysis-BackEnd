@@ -1,4 +1,4 @@
-import org.example.Main;
+import com.example.TechnicalAnalysis.TechnicalAnalysisApplication;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -36,7 +36,7 @@ public class SonarAnalysis {
     }
 
     private void checkoutToCommit() throws IOException {
-        if(Main.isWindows()) {
+        if(TechnicalAnalysisApplication.isWindows()) {
             Process proc = Runtime.getRuntime().exec("cmd /c cd " +System.getProperty("user.dir")+ "\\" + projectName +
                     " && git checkout " + sha + "");
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -93,7 +93,7 @@ public class SonarAnalysis {
 
     //Start Analysis with sonar scanner
     private void makeSonarAnalysis() throws IOException, InterruptedException {
-        if (Main.isWindows()) {
+        if (TechnicalAnalysisApplication.isWindows()) {
             Process proc = Runtime.getRuntime().exec("cmd /c cd " +System.getProperty("user.dir")+ "\\" + projectName +
                     " && ..\\sonar-scanner-4.7.0.2747-windows\\bin\\sonar-scanner.bat");
             System.out.println("start analysis");
@@ -139,7 +139,7 @@ public class SonarAnalysis {
 
     private void getMetricFromSonarQube() {
         try {
-            URL url = new URL(Main.SonarQube+"/api/measures/component?component="+projectOwner +":"+ projectName+
+            URL url = new URL(TechnicalAnalysisApplication.SonarQube+"/api/measures/component?component="+projectOwner +":"+ projectName+
                     "&metricKeys=sqale_index,complexity,ncloc");
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
@@ -181,7 +181,7 @@ public class SonarAnalysis {
     public boolean isFinishedAnalyzing(){
         boolean finished=false;
         try {
-            URL url = new URL(Main.SonarQube+"/api/ce/component?component="+projectOwner +":"+ projectName);
+            URL url = new URL(TechnicalAnalysisApplication.SonarQube+"/api/ce/component?component="+projectOwner +":"+ projectName);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
