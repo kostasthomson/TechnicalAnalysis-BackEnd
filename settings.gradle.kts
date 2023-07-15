@@ -1,2 +1,2 @@
-rootProject.name = "TechnicalAnalysis"
+rootProject.name = "TechnicalAnalysis-BackEnd"
 
