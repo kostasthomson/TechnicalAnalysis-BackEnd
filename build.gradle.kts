@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.googlecode.json-simple:json-simple:1.1.1")
     testImplementation(platform("org.junit:junit-bom:5.9.2"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 }
