@@ -36,4 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 
-/src/main/java/sonar-scanner-4.8.0.2856-windows
+/src/main/java/com/example/TechnicalAnalysis/Sonar
