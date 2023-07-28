@@ -1,30 +1,38 @@
 package com.example.TechnicalAnalysis.GitHub.EndPoints;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
-import com.example.TechnicalAnalysis.GitHub.Entities.Utils.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubEntityCollection;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-public class GitHubCollaboratorsEndPoint extends GitHubEndPoint{
-    private final GitHubCollaboratorList list = new GitHubCollaboratorList();
-    public GitHubCollaboratorsEndPoint() {
-        super("collaborators");
+public class GitHubCollaboratorsEndPoint extends GitHubEndPoint {
+    private final String name = "collaborators";
+    @Override
+    public GitHubEntityCollection request() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(root_url + this.name))
+                .headers(headers)
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(this::ParseResponse)
+                .join();
+        return list;
     }
 
     @Override
-    public void ParseResponse(Reader in) throws IOException, ParseException {
-        Object o = parser.parse(in);
-        if (o instanceof JSONArray) {
-            list.addAll((JSONArray) o);
-        }
+    public void request(GitHubCommit commit) {
+
     }
 
     @Override
     public void ParseResponse(String in) {
+        list = new GitHubCollaboratorList();
         try {
             Object o = parser.parse(in);
             if (o instanceof JSONArray) {
@@ -33,20 +41,5 @@ public class GitHubCollaboratorsEndPoint extends GitHubEndPoint{
         } catch (ParseException pe) {
             System.out.println("Exception: ParseException");
         }
-    }
-
-    @Override
-    public void PrintResponse() {
-        list.printList();
-    }
-
-    @Override
-    public void PrintResponse(Void unused) {
-        this.PrintResponse();
-    }
-
-    @Override
-    public List<GitHubEntity> getList() {
-        return this.list.getList();
     }
 }

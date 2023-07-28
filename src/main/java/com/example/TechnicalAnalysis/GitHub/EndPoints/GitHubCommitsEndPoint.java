@@ -1,34 +1,53 @@
 package com.example.TechnicalAnalysis.GitHub.EndPoints;
 
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
-import com.example.TechnicalAnalysis.GitHub.Entities.Utils.GitHubCommitList;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubEntityCollection;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class GitHubCommitsEndPoint extends GitHubEndPoint {
-    private final GitHubCommitList list = new GitHubCommitList();
-    public GitHubCommitsEndPoint() {
-        super("commits");
-    }
+    private final String name = "commits";
     @Override
-    public void ParseResponse(Reader in) throws IOException, ParseException {
-        Object o = parser.parse(in);
-        if (o instanceof JSONArray) {
-            list.addAll((JSONArray) o);
-        }
+    public GitHubEntityCollection request() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(root_url + this.name))
+                .headers(headers)
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(this::ParseResponse)
+                .join();
+        return list;
     }
 
     @Override
-    public void ParseResponse(String in) {
+    public void request(GitHubCommit commit) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(root_url + this.name + "/" + commit.getSha()))
+                .headers(headers)
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(this::ParseCommitResponse)
+                .join();
+    }
+
+    public void UpdateCommit(String sha, JSONObject jsonInfo) {
+        ((GitHubCommitList) list).get(sha).updateInfo(jsonInfo);
+    }
+
+    public void ParseCommitResponse(String in) {
         try {
             Object o = parser.parse(in);
-            if (o instanceof JSONArray) {
-                list.addAll((JSONArray) o);
+            if (o instanceof JSONObject json) {
+                String sha = json.get("sha").toString();
+                this.UpdateCommit(sha, json);
             }
         }catch (ParseException pe) {
             System.out.println("Exception: ParseException");
@@ -36,20 +55,15 @@ public class GitHubCommitsEndPoint extends GitHubEndPoint {
     }
 
     @Override
-    public void PrintResponse() {
-        list.printList();
-    }
-
-    @Override
-    public void PrintResponse(Void unused) {
-        this.PrintResponse();
-    }
-
-    public void UpdateCommit(GitHubCommit e, GitHubCommit ghc) {
-        this.list.UpdateCommit(e, ghc);
-    }
-
-    public List<GitHubEntity> getList() {
-        return this.list.getList();
+    public void ParseResponse(String in) {
+        list = new GitHubCommitList();
+        try {
+            Object o = parser.parse(in);
+            if (o instanceof JSONArray) {
+                list.addAll((JSONArray) o);
+            }
+        } catch (ParseException pe) {
+            System.out.println("Exception: ParseException");
+        }
     }
 }

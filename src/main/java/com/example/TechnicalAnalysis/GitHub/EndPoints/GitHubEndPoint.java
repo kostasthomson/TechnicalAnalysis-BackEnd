@@ -1,29 +1,25 @@
 package com.example.TechnicalAnalysis.GitHub.EndPoints;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
+import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubEntityCollection;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
+import java.net.http.HttpClient;
 
 public abstract class GitHubEndPoint {
-    private final String name;
+    protected final HttpClient client = HttpClient.newHttpClient();
     protected final JSONParser parser = new JSONParser();
-    protected GitHubEndPoint(String ep_name) {
-        this.name = ep_name;
-    }
+    protected GitHubEntityCollection list;
+    private final String Owner = "kostasthomson";
+    private final String Repo = "BlackJack";
+    protected final String root_url = "https://api.github.com/repos/"+Owner+"/"+Repo+"/";
+    protected final String[] headers = new String[] {
+            "Accept", "application/vnd.github+json",
+            "Authorization", "Bearer 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",
+            "X-GitHub-Api-Version", "2022-11-28"
+    };
+    public abstract GitHubEntityCollection request();
+    public abstract void request(GitHubCommit commit);
 
-    public abstract void ParseResponse(Reader in) throws IOException, ParseException;
     public abstract void ParseResponse(String in);
-    public abstract void PrintResponse();
-    public abstract void PrintResponse(Void unused);
-    @Override
-    public String toString() {
-        return this.name;
-    }
-
-    public abstract List<GitHubEntity> getList();
-
 }

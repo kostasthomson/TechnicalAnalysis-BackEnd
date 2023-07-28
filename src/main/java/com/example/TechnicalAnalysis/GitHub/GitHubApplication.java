@@ -1,19 +1,23 @@
 package com.example.TechnicalAnalysis.GitHub;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
-import com.example.TechnicalAnalysis.GitHub.RequestMethods.GitHubHTTP;
-
-import java.util.List;
+import com.example.TechnicalAnalysis.GitHub.Controllers.GitHubController;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCommitList;
 
 public class GitHubApplication {
-
     public static void main(String[] args) {
-        GitHubController.CliRequestCommits();
-        List<GitHubEntity> commits = GitHubHTTP.commits.getList();
-//        for (GitHubEntity e : commits) {
-//            GitHubController.HttpRequestCommit(e.toString());
-//
-//            ((GitHubCommitsEndPoint) GitHubHTTP.commits).UpdateCommit((GitHubCommit) e, GitHubHTTP.commit.getCommit());
-//        }
+        GitHubController controller = new GitHubController();
+        //collaborators request
+        //http request
+        GitHubCollaboratorList collaborators = controller.HttpCollaboratorsRequest();
+        //commits request
+        //http request
+        GitHubCommitList commits = controller.HttpCommitsRequest();
+        //for each of commits, find commit info
+        commits.forEach(controller::HttpCommitRequest);
+        //print ok
+        System.out.println("ok");
+        collaborators.printList();
+        commits.printList();
     }
 }
