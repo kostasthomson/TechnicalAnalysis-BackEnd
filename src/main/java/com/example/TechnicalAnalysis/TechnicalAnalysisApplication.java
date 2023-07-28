@@ -13,7 +13,6 @@ public class TechnicalAnalysisApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TechnicalAnalysisApplication.class, args);
 	}
-
 	public static boolean isWindows() {
 		return System.getProperty("filename.separator").equals("\\");
 	}
