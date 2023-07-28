@@ -1,25 +1,19 @@
 package com.example.TechnicalAnalysis.GitHub;
 
-import org.json.simple.parser.ParseException;
+import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
+import com.example.TechnicalAnalysis.GitHub.RequestMethods.GitHubHTTP;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.List;
 
 public class GitHubApplication {
-    public static void main(String[] args) throws IOException, ParseException {
-//        HttpClient client = HttpClient.newHttpClient();
-//        HttpRequest request = HttpRequest.newBuilder()
-//                .uri(URI.create("https://api.github.com/user/followers"))
-//                .build();
-//        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-//                .thenApply(HttpResponse::body)
-//                .thenAccept(System.out::println)
-//                .join();
 
-        Process proc = Runtime.getRuntime().exec("cmd /c gh api /repos/kostasthomson/BlackJack/collaborators");
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        GitHubResponseController.ParseResponse(inputReader);
-        GitHubResponseController.PrintResponse();
+    public static void main(String[] args) {
+        GitHubController.CliRequestCommits();
+        List<GitHubEntity> commits = GitHubHTTP.commits.getList();
+//        for (GitHubEntity e : commits) {
+//            GitHubController.HttpRequestCommit(e.toString());
+//
+//            ((GitHubCommitsEndPoint) GitHubHTTP.commits).UpdateCommit((GitHubCommit) e, GitHubHTTP.commit.getCommit());
+//        }
     }
 }
