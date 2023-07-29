@@ -1,8 +1,8 @@
 package com.example.TechnicalAnalysis.GitHub.EndPoints;
 
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubEntityCollection;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubEntityCollection;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 

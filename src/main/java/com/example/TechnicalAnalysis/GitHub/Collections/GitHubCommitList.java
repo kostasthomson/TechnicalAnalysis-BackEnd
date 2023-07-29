@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.GitHub.Entities.Collections;
+package com.example.TechnicalAnalysis.GitHub.Collections;
 
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
@@ -17,15 +17,11 @@ public class GitHubCommitList extends GitHubEntityCollection {
         for (Object o : array) {
             JSONObject json = (JSONObject) o;
             String sha = json.get("sha").toString();
+            JSONObject commit = (JSONObject) json.get("commit");
+            JSONObject author = (JSONObject) commit.get("author");
+            String date_text = author.get("date").toString();
             try {
-                Date date = new SimpleDateFormat("yyyy-MM-dd")
-                        .parse(
-                                ((JSONObject)
-                                        ((JSONObject) json.get("commit")
-                                        ).get("author")
-                                ).get("date")
-                                        .toString()
-                        );
+                Date date = new SimpleDateFormat("yyyy-MM-dd").parse(date_text);
                 list.add(new GitHubCommit(sha, date));
             } catch (ParseException e) {
                 System.out.println("Wrong Date Format...");

@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.GitHub.Entities.Collections;
+package com.example.TechnicalAnalysis.GitHub.Collections;
 
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
 import org.json.simple.JSONArray;

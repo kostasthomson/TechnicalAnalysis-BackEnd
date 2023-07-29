@@ -4,7 +4,7 @@ import com.example.TechnicalAnalysis.GitHub.EndPoints.GitHubCollaboratorsEndPoin
 import com.example.TechnicalAnalysis.GitHub.EndPoints.GitHubCommitsEndPoint;
 import com.example.TechnicalAnalysis.GitHub.EndPoints.GitHubEndPoint;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubEntityCollection;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubEntityCollection;
 
 import java.util.Hashtable;
 

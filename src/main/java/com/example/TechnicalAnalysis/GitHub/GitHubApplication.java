@@ -1,8 +1,8 @@
 package com.example.TechnicalAnalysis.GitHub;
 
 import com.example.TechnicalAnalysis.GitHub.Controllers.GitHubController;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCommitList;
 
 public class GitHubApplication {
     public static void main(String[] args) {

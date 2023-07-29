@@ -1,8 +1,8 @@
 package com.example.TechnicalAnalysis;
 
 import com.example.TechnicalAnalysis.GitHub.Controllers.GitHubController;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCommitList;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCollaborator;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
@@ -40,8 +40,7 @@ public class TechnicalAnalysisApplication {
             GitHubCommitList commits = controller.HttpCommitsRequest();
             commits.forEach(controller::HttpCommitRequest);
 
-            collaborators.printList();
-            commits.printList();
+
 
             collaboratorRepository.deleteAll();
             commitRepository.deleteAll();

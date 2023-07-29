@@ -1,12 +1,13 @@
 package com.example.TechnicalAnalysis.GitHub.Entities;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.Collections.GitHubFileList;
+import com.example.TechnicalAnalysis.GitHub.Collections.GitHubFileList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,8 +19,10 @@ public class GitHubCommit implements GitHubEntity {
     private long node_id;
     private String sha;
     private Date date;
-    private String author;
+    private String author_name;
     private long author_id;
+    @Relationship(type = "COMMITED")
+    private GitHubCollaborator author;
     @Autowired
     private GitHubFileList files;
 
@@ -29,7 +32,7 @@ public class GitHubCommit implements GitHubEntity {
         this.files = new GitHubFileList();
     }
     public void updateInfo(JSONObject json) {
-        this.author = ((JSONObject) json.get("author")).get("login").toString();
+        this.author_name = ((JSONObject) json.get("author")).get("login").toString();
         this.author_id = Long.parseLong(((JSONObject) json.get("author")).get("id").toString());
         this.files.addAll((JSONArray) json.get("files"));
     }
@@ -40,12 +43,12 @@ public class GitHubCommit implements GitHubEntity {
 
     @Override
     public String toString() {
-        return "Commit:\n\t\tsha:" + this.sha + "\n\t\tauthor:" + this.author + "\n\t\tdate:" + this.formatDate() + "\n\t\tfiles:" + this.files;
+        return "Commit:\n\t\tsha:" + this.sha + "\n\t\tauthor:" + this.author_name + "\n\t\tdate:" + this.formatDate() + "\n\t\tfiles:" + this.files;
     }
 
     public void Update(GitHubCommit ghc) {
         date = ghc.date;
-        author = ghc.author;
+        author_name = ghc.author_name;
         author_id = ghc.author_id;
         GitHubFileList files = ghc.files;
     }
@@ -54,11 +57,11 @@ public class GitHubCommit implements GitHubEntity {
         return this.sha.equals(sha);
     }
 
-    public long getNode_id() {
+    public long getNodeId() {
         return node_id;
     }
 
-    public void setNode_id(long node_id) {
+    public void setNodeId(long node_id) {
         this.node_id = node_id;
     }
 
@@ -78,20 +81,28 @@ public class GitHubCommit implements GitHubEntity {
         this.date = date;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getAuthorName() {
+        return author_name;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setAuthorName(String author) {
+        this.author_name = author;
     }
 
-    public long getAuthor_id() {
+    public long getAuthorId() {
         return author_id;
     }
 
-    public void setAuthor_id(long author_id) {
+    public void setAuthorId(long author_id) {
         this.author_id = author_id;
+    }
+
+    public void setAuthor(GitHubCollaborator author) {
+        this.author = author;
+    }
+
+    public GitHubCollaborator getAuthor() {
+        return this.author;
     }
 
     public GitHubFileList getFiles() {
