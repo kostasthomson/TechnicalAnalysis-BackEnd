@@ -13,7 +13,7 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
     @Override
     public void addAll(JSONArray array) {
         for (Object o : array) {
-            list.add(new GitHubCollaborator((JSONObject) o));
+            list.add(GitHubCollaborator.initializeJson((JSONObject) o));
         }
     }
 
