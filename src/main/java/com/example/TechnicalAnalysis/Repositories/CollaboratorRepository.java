@@ -11,6 +11,6 @@ import java.util.List;
 
 @RepositoryRestResource(collectionResourceRel = "collaborators", path = "collaborators")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
-public interface CollaboratorRepository extends PagingAndSortingRepository<GitHubCollaborator, Long>, CrudRepository<GitHubCollaborator, Long> {
+public interface CollaboratorRepository extends PagingAndSortingRepository<GitHubCollaborator, String>, CrudRepository<GitHubCollaborator, String> {
     List<GitHubCollaborator> findByName(@Param("name") String name);
 }

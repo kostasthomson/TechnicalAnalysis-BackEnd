@@ -33,6 +33,9 @@ public class TechnicalAnalysisApplication {
     @Bean
     CommandLineRunner demo(CollaboratorRepository collaboratorRepository, CommitRepository commitRepository) {
         return args -> {
+            collaboratorRepository.deleteAll();
+            commitRepository.deleteAll();
+
             GitHubController controller = new GitHubController();
 
             GitHubCollaboratorList collaborators = controller.HttpCollaboratorsRequest();
@@ -40,17 +43,14 @@ public class TechnicalAnalysisApplication {
             GitHubCommitList commits = controller.HttpCommitsRequest();
             commits.forEach(controller::HttpCommitRequest);
 
-
-
-            collaboratorRepository.deleteAll();
-            commitRepository.deleteAll();
-
             for (GitHubEntity collaborator: collaborators)
                 collaboratorRepository.save((GitHubCollaborator) collaborator);
 
             for (GitHubEntity commit: commits) {
                 commitRepository.save((GitHubCommit) commit);
             }
+
+            System.out.println("Set up completed");
         };
     }
 }

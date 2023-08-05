@@ -4,14 +4,15 @@ import org.json.simple.JSONObject;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 
 @Node("Collaborator")
 public class GitHubCollaborator implements GitHubEntity {
 
     @Id
-    @GeneratedValue
-    private long node_id;
+    @GeneratedValue(UUIDStringGenerator.class)
+    private String node_id;
 
     private long id;
     private String name;

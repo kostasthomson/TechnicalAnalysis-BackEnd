@@ -8,6 +8,7 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,8 +16,8 @@ import java.util.Date;
 @Node("Commit")
 public class GitHubCommit implements GitHubEntity {
     @Id
-    @GeneratedValue
-    private long node_id;
+    @GeneratedValue(UUIDStringGenerator.class)
+    private String node_id;
     private String sha;
     private Date date;
     private String author_name;
@@ -57,11 +58,11 @@ public class GitHubCommit implements GitHubEntity {
         return this.sha.equals(sha);
     }
 
-    public long getNodeId() {
+    public String getNodeId() {
         return node_id;
     }
 
-    public void setNodeId(long node_id) {
+    public void setNodeId(String node_id) {
         this.node_id = node_id;
     }
 

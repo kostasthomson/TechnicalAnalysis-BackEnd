@@ -11,7 +11,7 @@ import java.util.List;
 
 @RepositoryRestResource(collectionResourceRel = "commits", path = "commits")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
-public interface CommitRepository extends PagingAndSortingRepository<GitHubCommit, Long>, CrudRepository<GitHubCommit, Long> {
+public interface CommitRepository extends PagingAndSortingRepository<GitHubCommit, String>, CrudRepository<GitHubCommit, String> {
     List<GitHubCommit> findBySha(@Param("sha") String sha);
 }
 
