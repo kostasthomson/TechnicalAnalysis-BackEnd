@@ -20,9 +20,9 @@ public class GitHubCommit implements GitHubEntity {
     private String node_id;
     private String sha;
     private Date date;
-    private String author_name;
+//    private String author_name;
     private long author_id;
-    @Relationship(type = "COMMITED")
+    @Relationship(type = "AUTHOR")
     private GitHubCollaborator author;
     @Autowired
     private GitHubFileList files;
@@ -33,7 +33,7 @@ public class GitHubCommit implements GitHubEntity {
         this.files = new GitHubFileList();
     }
     public void updateInfo(JSONObject json) {
-        this.author_name = ((JSONObject) json.get("author")).get("login").toString();
+//        this.author_name = ((JSONObject) json.get("author")).get("login").toString();
         this.author_id = Long.parseLong(((JSONObject) json.get("author")).get("id").toString());
         this.files.addAll((JSONArray) json.get("files"));
     }
@@ -44,12 +44,12 @@ public class GitHubCommit implements GitHubEntity {
 
     @Override
     public String toString() {
-        return "Commit:\n\t\tsha:" + this.sha + "\n\t\tauthor:" + this.author_name + "\n\t\tdate:" + this.formatDate() + "\n\t\tfiles:" + this.files;
+        return "Commit:\n\t\tsha:" + this.sha + "\n\t\tauthor:" + /*this.author_name +*/ "\n\t\tdate:" + this.formatDate() + "\n\t\tfiles:" + this.files;
     }
 
     public void Update(GitHubCommit ghc) {
         date = ghc.date;
-        author_name = ghc.author_name;
+//        author_name = ghc.author_name;
         author_id = ghc.author_id;
         GitHubFileList files = ghc.files;
     }
@@ -82,13 +82,13 @@ public class GitHubCommit implements GitHubEntity {
         this.date = date;
     }
 
-    public String getAuthorName() {
-        return author_name;
-    }
-
-    public void setAuthorName(String author) {
-        this.author_name = author;
-    }
+//    public String getAuthorName() {
+//        return author_name;
+//    }
+//
+//    public void setAuthorName(String author) {
+//        this.author_name = author;
+//    }
 
     public long getAuthorId() {
         return author_id;

@@ -45,4 +45,8 @@ public class GitHubCollaborator implements GitHubEntity {
     public void setName(String name) {
         this.name = name;
     }
+
+    public boolean hasId(long authorId) {
+        return this.id == authorId;
+    }
 }

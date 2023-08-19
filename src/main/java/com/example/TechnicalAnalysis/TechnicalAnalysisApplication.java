@@ -43,6 +43,8 @@ public class TechnicalAnalysisApplication {
             GitHubCommitList commits = controller.HttpCommitsRequest();
             commits.forEach(controller::HttpCommitRequest);
 
+            controller.CreateRelation(commits, collaborators);
+
             for (GitHubEntity collaborator: collaborators)
                 collaboratorRepository.save((GitHubCollaborator) collaborator);
 

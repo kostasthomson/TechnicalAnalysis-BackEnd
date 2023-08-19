@@ -4,6 +4,7 @@ import com.example.TechnicalAnalysis.GitHub.Clients.GitHubClient;
 import com.example.TechnicalAnalysis.GitHub.Clients.GitHubHttpClient;
 import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCollaboratorList;
 import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCollaborator;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
 
@@ -21,5 +22,17 @@ public class GitHubController {
 
     public void HttpCommitRequest(GitHubEntity commit) {
         this.gitHubClient.request(GitHubHttpClient.EndPoint.COMMITS, (GitHubCommit) commit);
+    }
+
+    public void CreateRelation(GitHubCommitList commits, GitHubCollaboratorList collaborators) {
+        for (GitHubEntity commit : commits) {
+            GitHubCommit temp_commit = (GitHubCommit) commit;
+            for (GitHubEntity collaborator: collaborators) {
+                GitHubCollaborator temp_collaborator = (GitHubCollaborator) collaborator;
+                if (temp_collaborator.hasId(temp_commit.getAuthorId())) {
+                    temp_commit.setAuthor(temp_collaborator);
+                }
+            }
+        }
     }
 }
