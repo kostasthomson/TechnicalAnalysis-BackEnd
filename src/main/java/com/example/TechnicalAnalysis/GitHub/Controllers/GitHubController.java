@@ -24,6 +24,7 @@ public class GitHubController {
         this.gitHubClient.request(GitHubHttpClient.EndPoint.COMMITS, (GitHubCommit) commit);
     }
 
+    //TODO: Find a more efficient solution to map relationships
     public void CreateRelation(GitHubCommitList commits, GitHubCollaboratorList collaborators) {
         for (GitHubEntity commit : commits) {
             GitHubCommit temp_commit = (GitHubCommit) commit;
