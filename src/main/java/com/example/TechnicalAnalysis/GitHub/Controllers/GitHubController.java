@@ -8,6 +8,7 @@ import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCollaborator;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
 import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
 
+//TODO: create custom response for each endpoint to match frontend needs
 public class GitHubController {
     GitHubClient gitHubClient;
     public GitHubController() {
