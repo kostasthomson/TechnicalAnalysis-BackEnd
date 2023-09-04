@@ -1,17 +1,22 @@
-package com.example.TechnicalAnalysis.Services.ControllerService;
+package com.example.TechnicalAnalysis.Services.ConnectorService;
 
 import com.example.TechnicalAnalysis.Services.ClientService.GitHubClient;
 import com.example.TechnicalAnalysis.Services.ClientService.GitHubHttpClient;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.GenericRepository;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
 
 //TODO: create custom response for each endpoint to match frontend needs
-public class GitHubController {
+public class ConnectorController {
+    Analyzer analyzer;
+    Retriever retriever = new Retriever();
     GitHubClient gitHubClient;
-    public GitHubController() {
+    public ConnectorController(GenericRepository<?, ?>[] repos) {
+        this.analyzer = new Analyzer(repos);
+        this.analyzer.start();
         this.gitHubClient = new GitHubHttpClient();
     }
     public GitHubCollaboratorList HttpCollaboratorsRequest() {
