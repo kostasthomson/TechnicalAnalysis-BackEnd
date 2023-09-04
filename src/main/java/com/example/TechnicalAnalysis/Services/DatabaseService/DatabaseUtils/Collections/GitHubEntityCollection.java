@@ -1,6 +1,6 @@
-package com.example.TechnicalAnalysis.GitHub.Collections;
+package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import org.json.simple.JSONArray;
 
 import java.util.ArrayList;

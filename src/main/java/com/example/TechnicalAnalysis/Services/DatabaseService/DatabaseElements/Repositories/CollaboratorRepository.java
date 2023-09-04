@@ -1,6 +1,6 @@
-package com.example.TechnicalAnalysis.Repositories;
+package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCollaborator;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;

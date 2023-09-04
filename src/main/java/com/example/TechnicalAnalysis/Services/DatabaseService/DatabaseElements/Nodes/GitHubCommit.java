@@ -1,6 +1,6 @@
-package com.example.TechnicalAnalysis.GitHub.Entities;
+package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
 
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubFileList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubFileList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

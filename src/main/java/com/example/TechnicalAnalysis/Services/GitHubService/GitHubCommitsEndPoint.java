@@ -1,8 +1,8 @@
-package com.example.TechnicalAnalysis.GitHub.EndPoints;
+package com.example.TechnicalAnalysis.Services.GitHubService;
 
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCommitList;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubEntityCollection;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubEntityCollection;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;

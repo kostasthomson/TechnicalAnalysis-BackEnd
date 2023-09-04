@@ -1,13 +1,13 @@
 package com.example.TechnicalAnalysis;
 
-import com.example.TechnicalAnalysis.GitHub.Controllers.GitHubController;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCommitList;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCollaborator;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
-import com.example.TechnicalAnalysis.Repositories.CollaboratorRepository;
-import com.example.TechnicalAnalysis.Repositories.CommitRepository;
+import com.example.TechnicalAnalysis.Services.ControllerService.GitHubController;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.boot.CommandLineRunner;

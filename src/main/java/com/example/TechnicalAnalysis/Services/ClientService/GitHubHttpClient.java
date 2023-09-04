@@ -1,10 +1,10 @@
-package com.example.TechnicalAnalysis.GitHub.Clients;
+package com.example.TechnicalAnalysis.Services.ClientService;
 
-import com.example.TechnicalAnalysis.GitHub.EndPoints.GitHubCollaboratorsEndPoint;
-import com.example.TechnicalAnalysis.GitHub.EndPoints.GitHubCommitsEndPoint;
-import com.example.TechnicalAnalysis.GitHub.EndPoints.GitHubEndPoint;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubEntityCollection;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCollaboratorsEndPoint;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCommitsEndPoint;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubEndPoint;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubEntityCollection;
 
 import java.util.Hashtable;
 

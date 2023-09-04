@@ -1,12 +1,12 @@
-package com.example.TechnicalAnalysis.GitHub.Controllers;
+package com.example.TechnicalAnalysis.Services.ControllerService;
 
-import com.example.TechnicalAnalysis.GitHub.Clients.GitHubClient;
-import com.example.TechnicalAnalysis.GitHub.Clients.GitHubHttpClient;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.GitHub.Collections.GitHubCommitList;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCollaborator;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubCommit;
-import com.example.TechnicalAnalysis.GitHub.Entities.GitHubEntity;
+import com.example.TechnicalAnalysis.Services.ClientService.GitHubClient;
+import com.example.TechnicalAnalysis.Services.ClientService.GitHubHttpClient;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 
 //TODO: create custom response for each endpoint to match frontend needs
 public class GitHubController {

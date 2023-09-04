@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.GitHub.Entities;
+package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
 
 import org.json.simple.JSONObject;
 
