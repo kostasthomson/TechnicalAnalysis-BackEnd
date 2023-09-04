@@ -13,6 +13,7 @@ public class Analyzer {
         this.dbController = new DatabaseController(repos);
     }
 
+    //TODO: Finish db write
     public void start() {
         this.gitHubController.useFetch();
         this.dbController.write();
