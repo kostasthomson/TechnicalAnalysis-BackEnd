@@ -33,6 +33,7 @@ public class GitHubCollaborator implements GitHubEntity {
     public long getId() {
         return id;
     }
+    public String getStringId() {return String.valueOf(this.id);}
 
     public void setId(long id) {
         this.id = id;
@@ -49,4 +50,5 @@ public class GitHubCollaborator implements GitHubEntity {
     public boolean hasId(long authorId) {
         return this.id == authorId;
     }
+    public boolean hasId(String authorId) {return authorId.equals(String.valueOf(this.id));}
 }

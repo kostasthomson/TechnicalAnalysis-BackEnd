@@ -11,24 +11,35 @@ import java.util.function.Consumer;
 
 public class GitHubCollaboratorList extends GitHubEntityCollection {
     @Override
+    public GitHubEntity get(String key) {
+        try {
+            return this.list.get(key);
+        } catch (Exception ignored) {
+            System.out.println("No matching collaborator");
+        }
+        return null;
+    }
+
+    @Override
     public void addAll(JSONArray array) {
         for (Object o : array) {
-            list.add(GitHubCollaborator.initializeJson((JSONObject) o));
+            GitHubCollaborator collaborator = GitHubCollaborator.initializeJson((JSONObject) o);
+            list.put(collaborator.getStringId(), collaborator);
         }
     }
 
     @Override
     public Iterator<GitHubEntity> iterator() {
-        return list.iterator();
+        return list.values().iterator();
     }
 
     @Override
     public void forEach(Consumer<? super GitHubEntity> action) {
-        list.forEach(action);
+        list.values().forEach(action);
     }
 
     @Override
     public Spliterator<GitHubEntity> spliterator() {
-        return list.spliterator();
+        return list.values().spliterator();
     }
 }

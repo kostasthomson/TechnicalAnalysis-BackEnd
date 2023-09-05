@@ -1,14 +1,13 @@
 package com.example.TechnicalAnalysis.Services.GitHubService;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubEntityCollection;
+import com.example.TechnicalAnalysis.Services.GitHubService.Endpoints.EndpointsUtils.MapKeys;
+import com.example.TechnicalAnalysis.Services.GitHubService.Endpoints.GitHubCollaboratorsEndPoint;
+import com.example.TechnicalAnalysis.Services.GitHubService.Endpoints.GitHubCommitsEndPoint;
 
 import java.util.HashMap;
 
 public class GitHubEndpointFetcher {
-    public enum MapKeys {
-        COMMITS,
-        COLLABORATORS
-    }
     private final GitHubCommitsEndPoint commitsEndPoint;
     private final GitHubCollaboratorsEndPoint collaboratorsEndPoint;
 
@@ -19,9 +18,11 @@ public class GitHubEndpointFetcher {
         this.collaboratorsEndPoint = new GitHubCollaboratorsEndPoint();
         this.fetchResult = new HashMap<>();
     }
+
     public void fetchCommits() {
         this.fetchResult.put(MapKeys.COMMITS, this.commitsEndPoint.request());
     }
+
     public void fetchCollaborators() {
         this.fetchResult.put(MapKeys.COLLABORATORS, this.collaboratorsEndPoint.request());
     }

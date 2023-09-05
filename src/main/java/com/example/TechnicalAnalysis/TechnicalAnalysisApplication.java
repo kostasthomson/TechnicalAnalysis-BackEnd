@@ -1,14 +1,10 @@
 package com.example.TechnicalAnalysis;
 
 import com.example.TechnicalAnalysis.Services.ConnectorService.ConnectorController;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.GenericRepository;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.Services.GitHubService.Endpoints.EndpointsUtils.MapKeys;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -17,6 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @EnableTransactionManagement
 @EnableNeo4jRepositories
@@ -37,21 +36,13 @@ public class TechnicalAnalysisApplication {
             collaboratorRepository.deleteAll();
             commitRepository.deleteAll();
 
-            ConnectorController controller = new ConnectorController(new GenericRepository[] {collaboratorRepository, commitRepository});
+            Map<MapKeys, GenericRepository<?,?>> map = new HashMap<>();
+            map.put(MapKeys.COLLABORATORS, collaboratorRepository);
+            map.put(MapKeys.COMMITS, commitRepository);
 
-            GitHubCollaboratorList collaborators = controller.HttpCollaboratorsRequest();
+            ConnectorController controller = new ConnectorController(map);
 
-            GitHubCommitList commits = controller.HttpCommitsRequest();
-            commits.forEach(controller::HttpCommitRequest);
-
-            controller.CreateRelation(commits, collaborators);
-
-            for (GitHubEntity collaborator: collaborators)
-                collaboratorRepository.save((GitHubCollaborator) collaborator);
-
-            for (GitHubEntity commit: commits) {
-                commitRepository.save((GitHubCommit) commit);
-            }
+            controller.startAnalyzer();
 
             System.out.println("Set up completed");
         };

@@ -19,10 +19,11 @@ public class GitHubCommitList extends GitHubEntityCollection {
             String sha = json.get("sha").toString();
             JSONObject commit = (JSONObject) json.get("commit");
             JSONObject author = (JSONObject) commit.get("author");
+            String author_id = ((JSONObject) json.get("author")).get("id").toString();
             String date_text = author.get("date").toString();
             try {
                 Date date = new SimpleDateFormat("yyyy-MM-dd").parse(date_text);
-                list.add(new GitHubCommit(sha, date));
+                list.put(sha, new GitHubCommit(sha, date, author_id));
             } catch (ParseException e) {
                 System.out.println("Wrong Date Format...");
             }
@@ -30,27 +31,26 @@ public class GitHubCommitList extends GitHubEntityCollection {
     }
 
     public GitHubCommit get(String sha) {
-        for (GitHubEntity entity : list) {
-            GitHubCommit commit = (GitHubCommit) entity;
-            if (commit.Is(sha)) {
-                return commit;
-            }
+        try {
+            return (GitHubCommit) this.list.get(sha);
+        } catch (Exception ignored) {
+            System.out.println("No commit match");
         }
-        throw new RuntimeException("No commit match");
+        return null;
     }
 
     @Override
     public Iterator<GitHubEntity> iterator() {
-        return list.iterator();
+        return list.values().iterator();
     }
 
     @Override
     public void forEach(Consumer<? super GitHubEntity> action) {
-        list.forEach(action);
+        list.values().forEach(action);
     }
 
     @Override
     public Spliterator<GitHubEntity> spliterator() {
-        return list.spliterator();
+        return list.values().spliterator();
     }
 }

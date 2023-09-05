@@ -3,17 +3,11 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Col
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import org.json.simple.JSONArray;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class GitHubEntityCollection  implements Iterable<GitHubEntity>{
-    protected final List<GitHubEntity> list = new ArrayList<>();
+public abstract class GitHubEntityCollection implements Iterable<GitHubEntity>{
+    protected final Map<String, GitHubEntity> list = new HashMap<>();
+    public abstract GitHubEntity get(String key);
     public abstract void addAll(JSONArray array);
-    public void printList() {
-        System.out.println("("+list.size()+")[");
-        for (GitHubEntity e : list) {
-            System.out.println("\t"+e);
-        }
-        System.out.println("]");
-    }
 }

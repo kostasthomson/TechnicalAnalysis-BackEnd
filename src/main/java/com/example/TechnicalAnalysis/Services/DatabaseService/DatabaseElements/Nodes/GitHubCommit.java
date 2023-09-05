@@ -21,20 +21,21 @@ public class GitHubCommit implements GitHubEntity {
     private String sha;
     private Date date;
 //    private String author_name;
-    private long author_id;
-    @Relationship(type = "AUTHOR")
+    private String author_id;
+    @Relationship(type = "COMMITTED_BY", direction = Relationship.Direction.OUTGOING)
     private GitHubCollaborator author;
     @Autowired
     private GitHubFileList files;
 
-    public GitHubCommit(String sha, Date date) {
+    public GitHubCommit(String sha, Date date, String author_id) {
         this.sha = sha;
         this.date = date;
+        this.author_id = author_id;
         this.files = new GitHubFileList();
     }
     public void updateInfo(JSONObject json) {
 //        this.author_name = ((JSONObject) json.get("author")).get("login").toString();
-        this.author_id = Long.parseLong(((JSONObject) json.get("author")).get("id").toString());
+//        this.author_id = Long.parseLong(((JSONObject) json.get("author")).get("id").toString());
         this.files.addAll((JSONArray) json.get("files"));
     }
 
@@ -90,11 +91,11 @@ public class GitHubCommit implements GitHubEntity {
 //        this.author_name = author;
 //    }
 
-    public long getAuthorId() {
+    public String getAuthorId() {
         return author_id;
     }
 
-    public void setAuthorId(long author_id) {
+    public void setAuthorId(String author_id) {
         this.author_id = author_id;
     }
 

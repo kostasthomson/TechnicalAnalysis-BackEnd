@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.Services.GitHubService;
+package com.example.TechnicalAnalysis.Services.GitHubService.Endpoints;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;

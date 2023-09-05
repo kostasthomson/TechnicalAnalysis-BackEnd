@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.InputOutput;
+package com.example.TechnicalAnalysis.Services.DatabaseService;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
