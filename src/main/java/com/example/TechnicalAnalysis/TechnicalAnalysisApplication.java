@@ -21,29 +21,35 @@ import java.util.Map;
 @EnableNeo4jRepositories
 @SpringBootApplication
 public class TechnicalAnalysisApplication {
+    public static String SonarQube = "";
     protected final Log logger = LogFactory.getLog(getClass());
-	public static String SonarQube = "";
-	public static void main(String[] args) {
-		SpringApplication.run(TechnicalAnalysisApplication.class, args);
-	}
-	public static boolean isWindows() {
-		return System.getProperty("filename.separator").equals("\\");
-	}
+
+    public static void main(String[] args) {
+        SpringApplication.run(TechnicalAnalysisApplication.class, args);
+    }
+
+    public static boolean isWindows() {
+        return System.getProperty("filename.separator").equals("\\");
+    }
+
+    public static void InitializeDB(CollaboratorRepository collaboratorRepository, CommitRepository commitRepository) {
+        collaboratorRepository.deleteAll();
+        commitRepository.deleteAll();
+
+        Map<MapKeys, GenericRepository<?, ?>> map = new HashMap<>();
+        map.put(MapKeys.COLLABORATORS, collaboratorRepository);
+        map.put(MapKeys.COMMITS, commitRepository);
+
+        ConnectorController controller = new ConnectorController(map);
+
+        controller.startAnalyzer();
+
+    }
 
     @Bean
     CommandLineRunner demo(CollaboratorRepository collaboratorRepository, CommitRepository commitRepository) {
         return args -> {
-            collaboratorRepository.deleteAll();
-            commitRepository.deleteAll();
-
-            Map<MapKeys, GenericRepository<?,?>> map = new HashMap<>();
-            map.put(MapKeys.COLLABORATORS, collaboratorRepository);
-            map.put(MapKeys.COMMITS, commitRepository);
-
-            ConnectorController controller = new ConnectorController(map);
-
-            controller.startAnalyzer();
-
+//            InitializeDB(collaboratorRepository, commitRepository);
             System.out.println("Set up completed");
         };
     }

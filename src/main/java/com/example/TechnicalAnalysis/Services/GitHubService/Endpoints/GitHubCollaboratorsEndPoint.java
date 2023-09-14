@@ -12,6 +12,7 @@ import java.net.http.HttpResponse;
 
 public class GitHubCollaboratorsEndPoint extends GitHubEndPoint {
     private final String name = "collaborators";
+
     @Override
     public GitHubEntityCollection request() {
         HttpRequest request = HttpRequest.newBuilder()

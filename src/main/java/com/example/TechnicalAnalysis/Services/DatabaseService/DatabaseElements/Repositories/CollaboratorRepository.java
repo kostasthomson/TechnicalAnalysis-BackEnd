@@ -7,11 +7,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.List;
-
 @RepositoryRestResource(collectionResourceRel = "collaborators", path = "collaborators")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
 public interface CollaboratorRepository extends GenericRepository<GitHubCollaborator, String>, PagingAndSortingRepository<GitHubCollaborator, String>, CrudRepository<GitHubCollaborator, String> {
-    List<GitHubCollaborator> findByName(@Param("name") String name);
+    GitHubCollaborator findByName(@Param("name") String name);
+
+    GitHubCollaborator findById(@Param("id") long id);
 }
 
