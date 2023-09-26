@@ -14,7 +14,7 @@ public class DatabaseWriter {
     }
 
     public void saveCommits(CommitRepository repo, GitHubEntityCollection collection) {
-        for (GitHubEntity collaborator : collection)
-            repo.save((GitHubCommit) collaborator);
+        for (GitHubEntity commit : collection)
+            repo.save((GitHubCommit) commit);
     }
 }
