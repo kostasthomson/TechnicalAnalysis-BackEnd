@@ -36,6 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-src/main/resources/application.properties
+application-dev.properties
 
-/src/main/java/com/example/TechnicalAnalysis/Sonar
+/src/main/java/com/example/TechnicalAnalysis/Sonar/*
