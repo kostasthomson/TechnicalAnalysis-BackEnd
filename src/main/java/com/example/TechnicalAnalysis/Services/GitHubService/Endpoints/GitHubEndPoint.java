@@ -3,6 +3,7 @@ package com.example.TechnicalAnalysis.Services.GitHubService.Endpoints;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubEntityCollection;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.net.http.HttpClient;
 
@@ -11,7 +12,7 @@ public abstract class GitHubEndPoint {
     protected final JSONParser parser = new JSONParser();
     protected final String[] headers = new String[]{
             "Accept", "application/vnd.github+json",
-            "Authorization", "Bearer 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",
+            "Authorization", "Bearer " + this.apiKey,
             "X-GitHub-Api-Version", "2022-11-28"
     };
     private final String Owner = "kostasthomson";
