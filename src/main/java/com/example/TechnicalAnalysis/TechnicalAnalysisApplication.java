@@ -49,7 +49,7 @@ public class TechnicalAnalysisApplication {
     @Bean
     CommandLineRunner demo(CollaboratorRepository collaboratorRepository, CommitRepository commitRepository) {
         return args -> {
-//            InitializeDB(collaboratorRepository, commitRepository);
+            InitializeDB(collaboratorRepository, commitRepository);
             System.out.println("Set up completed");
         };
     }

@@ -10,15 +10,17 @@ import java.net.http.HttpClient;
 public abstract class GitHubEndPoint {
     protected final HttpClient client = HttpClient.newHttpClient();
     protected final JSONParser parser = new JSONParser();
+    private final String Owner = "kostasthomson";//"HouariZegai";
+    private final String Repo = "BlackJack";//"Calculator";
+    protected final String root_url = "https://api.github.com/repos/" + Owner + "/" + Repo + "/";
+    protected GitHubEntityCollection list;
+    @Value("${apiKey}")
+    private String apiKey;
     protected final String[] headers = new String[]{
             "Accept", "application/vnd.github+json",
             "Authorization", "Bearer " + this.apiKey,
             "X-GitHub-Api-Version", "2022-11-28"
     };
-    private final String Owner = "kostasthomson";
-    private final String Repo = "BlackJack";
-    protected final String root_url = "https://api.github.com/repos/" + Owner + "/" + Repo + "/";
-    protected GitHubEntityCollection list;
 
     public abstract GitHubEntityCollection request();
 

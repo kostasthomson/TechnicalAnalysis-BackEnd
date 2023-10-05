@@ -20,11 +20,11 @@ public class SonarAnalysis {
     Integer LOC;
     String version;
 
-    public SonarAnalysis(String projectOwner, String projectName, String sha, String vesrion) throws IOException, InterruptedException {
+    public SonarAnalysis(String projectOwner, String projectName, String sha, String version) throws IOException, InterruptedException {
         this.projectOwner = projectOwner;
         this.projectName = projectName;
         this.sha = sha;
-        this.version = vesrion;
+        this.version = version;
 
         //checkout
         checkoutToCommit();

@@ -6,6 +6,7 @@ import com.example.TechnicalAnalysis.Services.GitHubService.Endpoints.EndpointsU
 import java.util.Map;
 
 //TODO: create custom response for each endpoint to match frontend needs
+//TODO: REST CONTROLLER (GITHUB URL {PARAM})
 public class ConnectorController {
     Analyzer analyzer;
     Retriever retriever = new Retriever();
