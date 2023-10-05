@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 
 public class GitHubCommitsEndPoint extends GitHubEndPoint {
     private final String name = "commits";
+
     @Override
     public GitHubEntityCollection request() {
         HttpRequest request = HttpRequest.newBuilder()
@@ -49,7 +50,7 @@ public class GitHubCommitsEndPoint extends GitHubEndPoint {
                 String sha = json.get("sha").toString();
                 this.UpdateCommit(sha, json);
             }
-        }catch (ParseException pe) {
+        } catch (ParseException pe) {
             System.out.println("Exception: ParseException");
         }
     }

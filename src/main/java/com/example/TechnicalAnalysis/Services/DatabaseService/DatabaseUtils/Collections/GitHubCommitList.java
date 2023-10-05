@@ -18,9 +18,15 @@ public class GitHubCommitList extends GitHubEntityCollection {
             JSONObject json = (JSONObject) o;
             String sha = json.get("sha").toString();
             JSONObject commit = (JSONObject) json.get("commit");
-            JSONObject author = (JSONObject) commit.get("author");
-            String author_id = ((JSONObject) json.get("author")).get("id").toString();
-            String date_text = author.get("date").toString();
+            JSONObject author = (JSONObject) json.get("author");
+            String author_id = "-1";
+            if (author != null) {
+                System.out.println(author.toJSONString());
+                Long id = (Long) author.get("id");
+                if (id != null)
+                    author_id = id.toString();
+            }
+            String date_text = ((JSONObject) commit.get("author")).get("date").toString();
             try {
                 Date date = new SimpleDateFormat("yyyy-MM-dd").parse(date_text);
                 list.put(sha, new GitHubCommit(sha, date, author_id));

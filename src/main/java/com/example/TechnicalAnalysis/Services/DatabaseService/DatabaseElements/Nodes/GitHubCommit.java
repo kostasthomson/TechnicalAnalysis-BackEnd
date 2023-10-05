@@ -20,7 +20,7 @@ public class GitHubCommit implements GitHubEntity {
     private String node_id;
     private String sha;
     private Date date;
-//    private String author_name;
+    //    private String author_name;
     private String author_id;
     @Relationship(type = "COMMITTED_BY", direction = Relationship.Direction.OUTGOING)
     private GitHubCollaborator author;
@@ -33,6 +33,7 @@ public class GitHubCommit implements GitHubEntity {
         this.author_id = author_id;
         this.files = new GitHubFileList();
     }
+
     public void updateInfo(JSONObject json) {
 //        this.author_name = ((JSONObject) json.get("author")).get("login").toString();
 //        this.author_id = Long.parseLong(((JSONObject) json.get("author")).get("id").toString());
@@ -99,12 +100,12 @@ public class GitHubCommit implements GitHubEntity {
         this.author_id = author_id;
     }
 
-    public void setAuthor(GitHubCollaborator author) {
-        this.author = author;
-    }
-
     public GitHubCollaborator getAuthor() {
         return this.author;
+    }
+
+    public void setAuthor(GitHubCollaborator author) {
+        this.author = author;
     }
 
     public GitHubFileList getFiles() {

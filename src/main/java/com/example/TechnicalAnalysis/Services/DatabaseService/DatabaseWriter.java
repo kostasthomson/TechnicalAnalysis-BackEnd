@@ -9,11 +9,12 @@ import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Coll
 
 public class DatabaseWriter {
     public void saveCollaborators(CollaboratorRepository repo, GitHubEntityCollection collection) {
-        for (GitHubEntity collaborator: collection)
+        for (GitHubEntity collaborator : collection)
             repo.save((GitHubCollaborator) collaborator);
     }
+
     public void saveCommits(CommitRepository repo, GitHubEntityCollection collection) {
-        for (GitHubEntity collaborator: collection)
-            repo.save((GitHubCommit) collaborator);
+        for (GitHubEntity commit : collection)
+            repo.save((GitHubCommit) commit);
     }
 }
