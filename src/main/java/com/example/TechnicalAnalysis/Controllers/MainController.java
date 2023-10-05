@@ -22,6 +22,7 @@ public class MainController {
         this.commitRepository = comRepo;
     }
 
+    //TODO: Initialization doesn't working
     @GetMapping("/init")
     public String InitializeApplication(@RequestParam String link) {
         this.collaboratorRepository.deleteAll();
