@@ -19,6 +19,6 @@ public class TechnicalAnalysisApplication {
     }
 
     public static boolean isWindows() {
-        return System.getProperty("filename.separator").equals("\\");
+        return System.getProperty("os.name").contains("Windows");
     }
 }
