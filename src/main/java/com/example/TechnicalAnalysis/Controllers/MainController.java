@@ -25,6 +25,11 @@ public class MainController {
         this.collaboratorRepository.deleteAll();
         this.commitRepository.deleteAll();
 
+        // TODO: Check if repository already exists (optimization)
+        GitHubCLI.CloneRepository(link, null);
+
+        // TODO: Code not reachable
+        GitHubCLI.PrintCommits();
 //        Map<MapKeys, GenericRepository<?, ?>> map = new HashMap<>();
 //        map.put(MapKeys.COLLABORATORS, collaboratorRepository);
 //        map.put(MapKeys.COMMITS, commitRepository);
@@ -33,7 +38,6 @@ public class MainController {
 //
 //        controller.startAnalyzer();
 
-        GitHubCLI.CloneRepository(link, null);
 
         return "Set up complete " + link;
     }
