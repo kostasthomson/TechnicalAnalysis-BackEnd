@@ -7,8 +7,9 @@ import java.io.IOException;
 
 // TODO: GitHubCLI inheritance tree (WindowsCLI and UnixCLI)
 public abstract class GitHubCLI {
-    private static final File REPOS_DIR = new File("./ClonedRepos");
-    private static File WORKING_REPO = new File(REPOS_DIR.getPath() + "/" + REPOS_DIR.list()[0]);
+    private static final String REPOS_DIR_PATH = "./ClonedRepos";
+    private static final File REPOS_DIR = new File(REPOS_DIR_PATH);
+    private static File WORKING_REPO = new File(REPOS_DIR_PATH + "/" + REPOS_DIR.list()[0]);
 
     public static void CloneRepository(String repository) {
         // Define the Git clone command
@@ -23,7 +24,7 @@ public abstract class GitHubCLI {
             // Check the exit code
             if (exitCode == 0) {
                 try {
-                    WORKING_REPO = new File(REPOS_DIR.getPath() + "/" + REPOS_DIR.list()[0]);
+                    WORKING_REPO = new File(REPOS_DIR_PATH + "/" + REPOS_DIR.list()[0]);
                 } catch (NullPointerException npe) {
                     System.out.println("No repo folder found");
                 }
@@ -45,10 +46,17 @@ public abstract class GitHubCLI {
             processBuilder.command("bash", "-c", gitCommand); // For Unix-like systems
         }
 
-        // Set the working directory where the repository will be cloned
-        processBuilder
-                .inheritIO()
-                .directory((targetPath != null) ? WORKING_REPO : REPOS_DIR);
+        // Set the working directory where the git command will be executed
+        // Set the output stream where command's results will be displayed
+        if (targetPath != null) {
+            processBuilder
+                    .redirectOutput(new File(REPOS_DIR_PATH + "/" + targetPath + ".txt"))
+                    .directory(WORKING_REPO);
+        } else {
+            processBuilder
+                    .inheritIO()
+                    .directory(REPOS_DIR);
+        }
 
         // Start the process
         Process process = processBuilder.start();
@@ -58,8 +66,10 @@ public abstract class GitHubCLI {
     }
 
     public static void PrintCommits(String repoName) {
+        // Git command for logging all commits in a csv format following with the files that are related to commit
         String gitLogCommand = "git --no-pager log --pretty=format:\"%H, %an, %ae %cn, %ce, %ad, %s\" --name-only";
         try {
+            // Create a ProcessBuilder for the Git log command
             int exitCode = ExecuteCommand(gitLogCommand, repoName);
 
             // Check the exit code
