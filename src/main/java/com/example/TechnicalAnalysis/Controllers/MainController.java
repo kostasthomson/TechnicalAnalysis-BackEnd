@@ -33,7 +33,6 @@ public class MainController {
         String linkRepo = linkElements[linkElements.length - 1];
 
         if (!Arrays.stream(Objects.requireNonNull(new File("./ClonedRepos").list())).toList().contains(linkRepo)) {
-            // TODO: Check if repository already exists (optimization)
             System.out.println("Begin cloning");
             GitHubCLI.CloneRepository(link);
         }
