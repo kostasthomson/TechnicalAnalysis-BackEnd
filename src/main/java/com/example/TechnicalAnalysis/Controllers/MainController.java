@@ -6,6 +6,10 @@ import com.example.TechnicalAnalysis.Services.GitHubService.RepoClone.GitHubCLI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/init")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
@@ -25,11 +29,17 @@ public class MainController {
         this.collaboratorRepository.deleteAll();
         this.commitRepository.deleteAll();
 
-        // TODO: Check if repository already exists (optimization)
-        GitHubCLI.CloneRepository(link, null);
+        String[] linkElements = link.split("/");
+        String linkRepo = linkElements[linkElements.length - 1];
 
-        // TODO: Code not reachable
-        GitHubCLI.PrintCommits();
+        if (!Arrays.stream(Objects.requireNonNull(new File("./ClonedRepos").list())).toList().contains(linkRepo)) {
+            // TODO: Check if repository already exists (optimization)
+            System.out.println("Begin cloning");
+            GitHubCLI.CloneRepository(link);
+        }
+
+
+        GitHubCLI.PrintCommits(linkRepo);
 //        Map<MapKeys, GenericRepository<?, ?>> map = new HashMap<>();
 //        map.put(MapKeys.COLLABORATORS, collaboratorRepository);
 //        map.put(MapKeys.COMMITS, commitRepository);
