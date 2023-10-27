@@ -12,6 +12,7 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Node("Commit")
 public class GitHubCommit implements GitHubEntity {
@@ -26,6 +27,11 @@ public class GitHubCommit implements GitHubEntity {
     private GitHubCollaborator author;
     @Autowired
     private GitHubFileList files;
+
+    public GitHubCommit(String hash, String authorName, String authorEmail, String date, String message, List<String> changedFiles) {
+        this.sha = hash;
+        this.author_id = authorEmail;
+    }
 
     public GitHubCommit(String sha, Date date, String author_id) {
         this.sha = sha;
