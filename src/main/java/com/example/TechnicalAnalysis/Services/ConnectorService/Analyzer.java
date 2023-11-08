@@ -14,7 +14,7 @@ public class Analyzer {
 
     public Analyzer(Map<MapKeys, GenericRepository<?, ?>> repos) {
         this.gitHubController = new GitHubController();
-        this.dbController = new DatabaseController(repos);
+//        this.dbController = new DatabaseController(repos);
     }
 
     public void fetch() {
@@ -24,6 +24,6 @@ public class Analyzer {
 
     public void write() {
         Map<MapKeys, GitHubEntityCollection> results = this.gitHubController.getFetchResults();
-        this.dbController.write(results);
+//        this.dbController.write(results);
     }
 }
