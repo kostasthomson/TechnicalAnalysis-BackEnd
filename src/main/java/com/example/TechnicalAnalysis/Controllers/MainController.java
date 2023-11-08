@@ -1,7 +1,9 @@
 package com.example.TechnicalAnalysis.Controllers;
 
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseController;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubInterpreter;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
 import com.example.TechnicalAnalysis.Services.GitHubService.RepoClone.GitHubCLI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,6 @@ public class MainController {
         this.commitRepository = comRepo;
     }
 
-    //TODO: Initialization doesn't working
     @GetMapping
     public void InitializeApplication(@RequestParam String link) {
         // Refresh all repositories
@@ -37,15 +38,14 @@ public class MainController {
         GitHubCLI.LogHistory();
 
         // Read repository's log file
-        GitHubLogReader.read();
+        GitHubLogReader.ReadLogFile();
 
-//        Map<MapKeys, GenericRepository<?, ?>> map = new HashMap<>();
-//        map.put(MapKeys.COLLABORATORS, collaboratorRepository);
-//        map.put(MapKeys.COMMITS, commitRepository);
-//
-//        ConnectorController controller = new ConnectorController(map);
-//
-//        controller.startAnalyzer();
+        // Create commits' list
+        GitHubInterpreter.CreateCommitsList();
+
+        // Store commits to repository
+        DatabaseController.WriteCommits(commitRepository, GitHubInterpreter.getCommitsList());
+
         System.out.println("Set up complete " + link);
     }
 }

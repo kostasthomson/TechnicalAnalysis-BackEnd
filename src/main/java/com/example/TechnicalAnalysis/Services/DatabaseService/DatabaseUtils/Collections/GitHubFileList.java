@@ -1,13 +1,22 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
 import org.json.simple.JSONArray;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class GitHubFileList extends GitHubEntityCollection {
+    public GitHubFileList(List<String> commitFiles) {
+        super();
+        commitFiles.stream()
+                .map(GitHubFile::new)
+                .forEach(file -> list.put(file.getName(), file));
+    }
+
     @Override
     public GitHubEntity get(String key) {
         return null;
@@ -21,6 +30,13 @@ public class GitHubFileList extends GitHubEntityCollection {
 //                list.add(file);
 //            }
 //        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        list.forEach((key, value) -> stringBuilder.append(list.get(key)).append("\n"));
+        return stringBuilder.toString();
     }
 
     @Override
