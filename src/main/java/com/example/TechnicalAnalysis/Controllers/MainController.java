@@ -7,10 +7,12 @@ import com.example.TechnicalAnalysis.Services.GitHubService.GitHubInterpreter;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
 import com.example.TechnicalAnalysis.Services.GitHubService.RepoClone.GitHubCLI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/init")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
 public class MainController {
     private final CollaboratorRepository collaboratorRepository;
@@ -22,7 +24,7 @@ public class MainController {
         this.commitRepository = comRepo;
     }
 
-    @GetMapping
+    @GetMapping("/init")
     public void InitializeApplication(@RequestParam String link) {
         // Reset all repositories
         this.collaboratorRepository.deleteAll();
