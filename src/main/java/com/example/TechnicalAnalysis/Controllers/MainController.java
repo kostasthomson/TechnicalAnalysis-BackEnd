@@ -3,16 +3,14 @@ package com.example.TechnicalAnalysis.Controllers;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseController;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCLI;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubInterpreter;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
-import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCLI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/init")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
 public class MainController {
     private final CollaboratorRepository collaboratorRepository;
@@ -24,7 +22,7 @@ public class MainController {
         this.commitRepository = comRepo;
     }
 
-    @GetMapping("/init")
+    @GetMapping
     public void InitializeApplication(@RequestParam String link) {
         // Reset all repositories
         this.collaboratorRepository.deleteAll();
