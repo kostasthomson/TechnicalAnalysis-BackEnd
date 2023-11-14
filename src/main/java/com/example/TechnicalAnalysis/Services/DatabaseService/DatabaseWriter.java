@@ -5,7 +5,7 @@ import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.N
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubEntityCollection;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubEntityCollection;
 
 public class DatabaseWriter {
     public void saveCollaborators(CollaboratorRepository repo, GitHubEntityCollection collection) {

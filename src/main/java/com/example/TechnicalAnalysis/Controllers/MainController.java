@@ -5,7 +5,7 @@ import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.R
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubInterpreter;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
-import com.example.TechnicalAnalysis.Services.GitHubService.RepoClone.GitHubCLI;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCLI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

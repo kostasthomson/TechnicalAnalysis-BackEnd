@@ -1,11 +1,10 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubCommitList;
 
 public class DatabaseController {
     private static final DatabaseWriter dbWriter = new DatabaseWriter();
-    private static final DatabaseReader dbReader = new DatabaseReader();
 
 //    private final Map<MapKeys, GenericRepository<?, ?>> repositories;
 
@@ -23,9 +22,5 @@ public class DatabaseController {
 
     public static void WriteCommits(CommitRepository repo, GitHubCommitList list) {
         dbWriter.saveCommits(repo, list);
-    }
-
-    public void read() {
-        dbReader.get();
     }
 }

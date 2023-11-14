@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.Services.GitHubService.RepoClone;
+package com.example.TechnicalAnalysis.Services.GitHubService;
 
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
 import com.example.TechnicalAnalysis.TechnicalAnalysisApplication;

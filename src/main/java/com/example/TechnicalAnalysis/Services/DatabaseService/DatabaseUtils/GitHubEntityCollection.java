@@ -1,4 +1,4 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections;
+package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import org.json.simple.JSONArray;
