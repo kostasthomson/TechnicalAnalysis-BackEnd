@@ -12,4 +12,6 @@ public abstract class GitHubEntityCollection implements Iterable<GitHubEntity> {
     public abstract GitHubEntity get(String key);
 
     public abstract void addAll(JSONArray array);
+
+    public abstract void add(GitHubEntity object);
 }

@@ -42,6 +42,12 @@ public class GitHubCommitList extends GitHubEntityCollection {
         }
     }
 
+    @Override
+    public void add(GitHubEntity object) {
+        GitHubCommit commit = (GitHubCommit) object;
+        this.list.put(commit.getSha(), commit);
+    }
+
     public GitHubCommit get(String sha) {
         try {
             return (GitHubCommit) this.list.get(sha);

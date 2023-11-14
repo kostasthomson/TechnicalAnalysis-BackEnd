@@ -33,6 +33,12 @@ public class GitHubFileList extends GitHubEntityCollection {
     }
 
     @Override
+    public void add(GitHubEntity object) {
+        GitHubFile commit = (GitHubFile) object;
+        this.list.put(commit.getName(), commit);
+    }
+
+    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         list.forEach((key, value) -> stringBuilder.append(list.get(key)).append("\n"));
