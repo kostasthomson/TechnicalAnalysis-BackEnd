@@ -40,4 +40,4 @@ application-dev.properties
 
 /src/main/java/com/example/TechnicalAnalysis/Sonar/*
 
-/ClonedRepos
+/ClonedRepos/*
