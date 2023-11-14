@@ -1,6 +1,7 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubFileList;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCollaboratorBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class GitHubCommit implements GitHubEntity {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy Z");
         this.date = LocalDateTime.parse(commitInfo.get(4), formatter);
 
-        this.author = new GitHubCollaborator(this.author_id, commitInfo.get(1));
+        this.author = GitHubCollaboratorBuilder.getCollaborator(this.author_id, commitInfo.get(1));
 //        this.files = new GitHubFileList(commitFiles);
     }
 
