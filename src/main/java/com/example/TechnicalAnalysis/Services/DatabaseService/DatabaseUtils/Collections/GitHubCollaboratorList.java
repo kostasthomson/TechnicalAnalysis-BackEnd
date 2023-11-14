@@ -3,7 +3,6 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Col
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -23,9 +22,15 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
     @Override
     public void addAll(JSONArray array) {
         for (Object o : array) {
-            GitHubCollaborator collaborator = GitHubCollaborator.initializeJson((JSONObject) o);
-            list.put(collaborator.getStringId(), collaborator);
+//            GitHubCollaborator collaborator = GitHubCollaborator.initializeJson((JSONObject) o);
+//            list.put(collaborator.getStringId(), collaborator);
         }
+    }
+
+    @Override
+    public void add(GitHubEntity object) {
+        GitHubCollaborator collaborator = (GitHubCollaborator) object;
+        this.list.put(collaborator.getId(), collaborator);
     }
 
     @Override
@@ -42,4 +47,5 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
     public Spliterator<GitHubEntity> spliterator() {
         return list.values().spliterator();
     }
+
 }
