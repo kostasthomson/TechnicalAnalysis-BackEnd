@@ -1,6 +1,6 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubFileList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubFileList;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCollaboratorBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

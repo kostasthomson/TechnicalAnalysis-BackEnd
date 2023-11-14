@@ -1,7 +1,7 @@
 package com.example.TechnicalAnalysis.Services.GitHubService;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCommitList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubCommitList;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.example.TechnicalAnalysis.Services.GitHubService;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.Collections.GitHubCollaboratorList;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubCollaboratorList;
 
 // Implemented factory pattern along with singleton pattern
 public abstract class GitHubCollaboratorBuilder {
