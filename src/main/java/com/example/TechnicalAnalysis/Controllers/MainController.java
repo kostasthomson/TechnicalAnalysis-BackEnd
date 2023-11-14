@@ -24,7 +24,7 @@ public class MainController {
 
     @GetMapping
     public void InitializeApplication(@RequestParam String link) {
-        // Refresh all repositories
+        // Reset all repositories
         this.collaboratorRepository.deleteAll();
         this.commitRepository.deleteAll();
 
