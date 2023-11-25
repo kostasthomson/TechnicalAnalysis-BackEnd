@@ -15,45 +15,26 @@ public class GitHubCollaborator implements GitHubEntity {
 
     private String email;
     private String name;
-
-//    public GitHubCollaborator(long id, String name) {
-//        this.id = id;
-//        this.name = name;
-//    }
-
-    public GitHubCollaborator(String authorId, String name) {
-        this.email = authorId;
-        this.name = name;
+    
+    public GitHubCollaborator() {
+        // default, no argument constructor
     }
 
-//    public static GitHubCollaborator initializeJson(JSONObject json) {
-//        long id = Long.parseLong(json.get("id").toString());
-//        String name = json.get("login").toString();
-//        return new GitHubCollaborator(id, name);
-//    }
+    public GitHubCollaborator(String email, String name) {
+        this.email = email;
+        this.name = name;
+    }
 
     public String toString() {
         return "Collaborator: \n\t{\n\t\tid:" + this.email + "\n\t\tname:" + this.name + "\n\t}";
     }
 
-//    public long getId() {
-//        return id;
-//    }
-//
-//    public void setId(long id) {
-//        this.id = id;
-//    }
-//
-//    public String getStringId() {
-//        return String.valueOf(this.id);
-//    }
-
     public String getId() {
         return this.email;
     }
 
-    public String setId(String new_id) {
-        return this.email = new_id;
+    public void setId(String new_id) {
+        this.email = new_id;
     }
 
     public String getName() {
@@ -64,15 +45,11 @@ public class GitHubCollaborator implements GitHubEntity {
         this.name = name;
     }
 
-//    public boolean hasId(long authorId) {
-//        return this.id == authorId;
-//    }
-
-    public boolean hadId(String comp_id) {
-        return this.email.equals(comp_id);
+    public String getNode_id() {
+        return node_id;
     }
 
-//    public boolean hasId(String authorId) {
-//        return authorId.equals(String.valueOf(this.id));
-//    }
+    public void setNode_id(String node_id) {
+        this.node_id = node_id;
+    }
 }

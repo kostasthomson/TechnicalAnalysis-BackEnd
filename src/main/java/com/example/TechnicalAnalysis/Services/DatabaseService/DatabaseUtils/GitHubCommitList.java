@@ -35,7 +35,7 @@ public class GitHubCommitList extends GitHubEntityCollection {
             String date_text = ((JSONObject) commit.get("author")).get("date").toString();
             try {
                 Date date = new SimpleDateFormat("yyyy-MM-dd").parse(date_text);
-                list.put(sha, new GitHubCommit(sha, author_id));
+//                list.put(sha, new GitHubCommit(sha, author_id));
             } catch (ParseException e) {
                 System.out.println("Wrong Date Format...");
             }

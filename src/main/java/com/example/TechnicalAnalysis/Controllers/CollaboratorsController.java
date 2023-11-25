@@ -25,7 +25,7 @@ public class CollaboratorsController {
     }
 
     @GetMapping("/{id}")
-    public GitHubCollaborator GetCommit(@PathVariable long id) {
-        return this.repository.findById(id);
+    public GitHubCollaborator GetCommit(@PathVariable String id) {
+        return this.repository.findByEmail(id);
     }
 }

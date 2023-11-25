@@ -1,16 +1,18 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
 
-import org.json.simple.JSONObject;
-
+//@Node("File")
 public class GitHubFile implements GitHubEntity {
-    private final String name;
+    //    @Id
+//    @GeneratedValue(UUIDStringGenerator.class)
+    private String node_id;
+    private String name;
+
+    public GitHubFile() {
+        // default, no argument constructor
+    }
 
     public GitHubFile(String fileName) {
         this.name = fileName;
-    }
-
-    public GitHubFile(JSONObject json) {
-        this.name = json.get("filename").toString();
     }
 
     public boolean isJava() {
@@ -19,6 +21,18 @@ public class GitHubFile implements GitHubEntity {
 
     public String getName() {
         return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getNode_id() {
+        return node_id;
+    }
+
+    public void setNode_id(String node_id) {
+        this.node_id = node_id;
     }
 
     @Override
