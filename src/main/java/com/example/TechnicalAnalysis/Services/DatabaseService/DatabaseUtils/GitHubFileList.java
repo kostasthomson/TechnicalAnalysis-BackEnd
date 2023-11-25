@@ -19,7 +19,7 @@ public class GitHubFileList extends GitHubEntityCollection {
 
     @Override
     public GitHubEntity get(String key) {
-        return null;
+        return list.get(key);
     }
 
     @Override

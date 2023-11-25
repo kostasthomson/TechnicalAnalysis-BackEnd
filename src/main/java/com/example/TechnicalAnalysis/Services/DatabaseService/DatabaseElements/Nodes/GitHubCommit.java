@@ -2,82 +2,91 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubFileList;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCollaboratorBuilder;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Node("Commit")
 public class GitHubCommit implements GitHubEntity {
     @Id
+    @GeneratedValue(UUIDStringGenerator.class)
+    private String node_id;
     private String sha;
-    private LocalDateTime date;
-    private String author_id;
+    private String date;
     private String message;
     @Relationship(type = "COMMITTED_BY", direction = Relationship.Direction.OUTGOING)
     private GitHubCollaborator author;
-    @Autowired
     private GitHubFileList files;
 
-    public GitHubCommit(String sha, String author_id) {
-        this.sha = sha;
-        this.author_id = author_id;
+    public GitHubCommit() {
+        // default, no argument constructor
     }
 
     public GitHubCommit(List<String> commitInfo, List<String> commitFiles) {
         this.sha = commitInfo.get(0);
-        this.author_id = commitInfo.get(3);
         this.message = commitInfo.get(5);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy Z");
-        this.date = LocalDateTime.parse(commitInfo.get(4), formatter);
+        // Define the formatter for the input date string
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
 
-        this.author = GitHubCollaboratorBuilder.getCollaborator(this.author_id, commitInfo.get(1));
+        // Parse the input date string
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(commitInfo.get(4), inputFormatter);
+
+        // Convert to ISO-8601 format
+        DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME;
+        this.date = offsetDateTime.format(isoFormatter);
+
+        this.author = GitHubCollaboratorBuilder.getCollaborator(commitInfo.get(3), commitInfo.get(1));
 //        this.files = new GitHubFileList(commitFiles);
     }
 
-    public void updateInfo(JSONObject json) {
-        this.files.addAll((JSONArray) json.get("files"));
-    }
 
     @Override
     public String toString() {
         return "Commit:\n\t\tsha:" + this.sha + "\n\t\tdate:" + this.date + "\n\t\tfiles:" + this.files;
     }
 
+    public String getNode_id() {
+        return node_id;
+    }
+
+    public void setNode_id(String node_id) {
+        this.node_id = node_id;
+    }
+
     public String getSha() {
-        return this.sha;
+        return sha;
     }
 
-    public void setSha(String new_sha) {
-        this.sha = new_sha;
+    public void setSha(String sha) {
+        this.sha = sha;
     }
 
-    public LocalDateTime getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
-
-    public String getAuthorId() {
-        return author_id;
+    public String getMessage() {
+        return message;
     }
 
-    public void setAuthorId(String author_id) {
-        this.author_id = author_id;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public GitHubCollaborator getAuthor() {
-        return this.author;
+        return author;
     }
 
     public void setAuthor(GitHubCollaborator author) {
@@ -90,13 +99,5 @@ public class GitHubCommit implements GitHubEntity {
 
     public void setFiles(GitHubFileList files) {
         this.files = files;
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
-    public void setMessage(String new_message) {
-        this.message = new_message;
     }
 }
