@@ -43,7 +43,7 @@ public class GitHubCommit implements GitHubEntity {
         DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME;
         this.date = offsetDateTime.format(isoFormatter);
 
-        this.author = GitHubCollaboratorBuilder.getCollaborator(commitInfo.get(3), commitInfo.get(1));
+        this.author = GitHubCollaboratorBuilder.getCollaborator(commitInfo.get(1), commitInfo.get(3));
 //        this.files = new GitHubFileList(commitFiles);
     }
 

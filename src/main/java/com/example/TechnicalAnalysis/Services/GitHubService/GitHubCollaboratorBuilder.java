@@ -7,10 +7,10 @@ import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitH
 public abstract class GitHubCollaboratorBuilder {
     private static final GitHubCollaboratorList collaborators = new GitHubCollaboratorList();
 
-    public static GitHubCollaborator getCollaborator(String id, String name) {
-        GitHubCollaborator collaborator = (GitHubCollaborator) collaborators.get(id);
+    public static GitHubCollaborator getCollaborator(String name, String email) {
+        GitHubCollaborator collaborator = (GitHubCollaborator) collaborators.get(email);
         if (collaborator == null) {
-            collaborator = new GitHubCollaborator(id, name);
+            collaborator = new GitHubCollaborator(name, email);
             collaborators.add(collaborator);
         }
         return collaborator;

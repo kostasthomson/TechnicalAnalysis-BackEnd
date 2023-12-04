@@ -15,26 +15,32 @@ public class GitHubCollaborator implements GitHubEntity {
 
     private String email;
     private String name;
-    
+
     public GitHubCollaborator() {
         // default, no argument constructor
     }
 
-    public GitHubCollaborator(String email, String name) {
-        this.email = email;
+    public GitHubCollaborator(String name, String email) {
         this.name = name;
+        this.email = email;
     }
 
     public String toString() {
         return "Collaborator: \n\t{\n\t\tid:" + this.email + "\n\t\tname:" + this.name + "\n\t}";
     }
 
-    public String getId() {
+    // TODO: CREATE COLLABORATOR IDENTIFICATION KEY -> IF NO EMAIL KEEP THE NAME ELSE USE EMAIL
+    public String getKey() {
+        if (this.email.equals("noreply@github.com")) return this.name;
+        return this.name + " " + this.email;
+    }
+
+    public String getEmail() {
         return this.email;
     }
 
-    public void setId(String new_id) {
-        this.email = new_id;
+    public void setEmail(String new_email) {
+        this.email = new_email;
     }
 
     public String getName() {
