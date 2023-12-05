@@ -2,6 +2,7 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
 import java.util.Iterator;
@@ -30,10 +31,11 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
     @Override
     public void add(GitHubEntity object) {
         GitHubCollaborator collaborator = (GitHubCollaborator) object;
-        this.list.put(collaborator.getKey(), collaborator);
+        this.list.put(collaborator.getId(), collaborator);
     }
 
     @Override
+    @NotNull
     public Iterator<GitHubEntity> iterator() {
         return list.values().iterator();
     }

@@ -29,10 +29,8 @@ public class GitHubCollaborator implements GitHubEntity {
         return "Collaborator: \n\t{\n\t\tid:" + this.email + "\n\t\tname:" + this.name + "\n\t}";
     }
 
-    // TODO: CREATE COLLABORATOR IDENTIFICATION KEY -> IF NO EMAIL KEEP THE NAME ELSE USE EMAIL
-    public String getKey() {
-        if (this.email.equals("noreply@github.com")) return this.name;
-        return this.name + " " + this.email;
+    public String getId() {
+        return "";
     }
 
     public String getEmail() {

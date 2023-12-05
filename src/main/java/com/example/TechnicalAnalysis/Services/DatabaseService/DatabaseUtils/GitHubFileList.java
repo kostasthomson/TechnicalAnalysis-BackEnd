@@ -2,6 +2,7 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
 import java.util.Iterator;
@@ -46,6 +47,7 @@ public class GitHubFileList extends GitHubEntityCollection {
     }
 
     @Override
+    @NotNull
     public Iterator<GitHubEntity> iterator() {
         return list.values().iterator();
     }
