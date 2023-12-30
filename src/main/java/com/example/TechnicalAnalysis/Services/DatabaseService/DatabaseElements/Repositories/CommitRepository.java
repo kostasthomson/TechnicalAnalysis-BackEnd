@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RepositoryRestResource(collectionResourceRel = "commits", path = "commits")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
-public interface CommitRepository extends GenericRepository<GitHubCommit, String>, PagingAndSortingRepository<GitHubCommit, String>, CrudRepository<GitHubCommit, String> {
+public interface CommitRepository extends
+        PagingAndSortingRepository<GitHubCommit, String>,
+        CrudRepository<GitHubCommit, String> {
     GitHubCommit findBySha(@Param("sha") String sha);
 }
 

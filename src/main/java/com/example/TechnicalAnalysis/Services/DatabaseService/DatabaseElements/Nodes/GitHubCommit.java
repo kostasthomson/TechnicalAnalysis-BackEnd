@@ -1,7 +1,7 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
 
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseController;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubFileList;
-import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCollaboratorBuilder;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -43,7 +43,7 @@ public class GitHubCommit implements GitHubEntity {
         DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME;
         this.date = offsetDateTime.format(isoFormatter);
 
-        this.author = GitHubCollaboratorBuilder.getCollaborator(commitInfo.get(1), commitInfo.get(3));
+        this.author = DatabaseController.findCollaborator(commitInfo.get(1));
 //        this.files = new GitHubFileList(commitFiles);
     }
 

@@ -2,6 +2,7 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
@@ -25,6 +26,13 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
         for (Object o : array) {
 //            GitHubCollaborator collaborator = GitHubCollaborator.initializeJson((JSONObject) o);
 //            list.put(collaborator.getStringId(), collaborator);
+        }
+    }
+
+    @Override
+    public void addAll(JsonNode array) {
+        for (JsonNode obj : array) {
+            this.list.put(obj.get("id").asText(), new GitHubCollaborator(obj));
         }
     }
 

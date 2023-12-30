@@ -2,6 +2,7 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
@@ -31,6 +32,11 @@ public class GitHubFileList extends GitHubEntityCollection {
 //                list.add(file);
 //            }
 //        }
+    }
+
+    @Override
+    public void addAll(JsonNode array) {
+
     }
 
     @Override
