@@ -3,6 +3,7 @@ package com.example.TechnicalAnalysis.Controllers;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseController;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.FileRepository;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCLI;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubInterpreter;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
@@ -15,11 +16,13 @@ import org.springframework.web.bind.annotation.*;
 public class MainController {
     private final CollaboratorRepository collaboratorRepository;
     private final CommitRepository commitRepository;
+    private final FileRepository fileRepository;
 
     @Autowired
-    public MainController(CollaboratorRepository colRepo, CommitRepository comRepo) {
+    public MainController(CollaboratorRepository colRepo, CommitRepository comRepo, FileRepository fRepo) {
         this.collaboratorRepository = colRepo;
         this.commitRepository = comRepo;
+        this.fileRepository = fRepo;
     }
 
     @GetMapping
@@ -27,6 +30,7 @@ public class MainController {
         // Reset all repositories
         this.collaboratorRepository.deleteAll();
         this.commitRepository.deleteAll();
+        this.fileRepository.deleteAll();
 
         // Initialize repository specific attributes
         GitHubCLI.setWorkingRepository(link);

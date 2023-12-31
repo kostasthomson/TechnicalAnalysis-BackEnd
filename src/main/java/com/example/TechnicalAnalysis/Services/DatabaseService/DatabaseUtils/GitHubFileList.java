@@ -1,5 +1,6 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
 import org.json.simple.JSONArray;
@@ -10,10 +11,10 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class GitHubFileList extends GitHubEntityCollection {
-    public GitHubFileList(List<String> commitFiles) {
+    public GitHubFileList(List<String> commitFiles, GitHubCommit commit) {
         super();
         commitFiles.stream()
-                .map(GitHubFile::new)
+                .map(fileName -> new GitHubFile(fileName, commit))
                 .forEach(file -> list.put(file.getName(), file));
     }
 
