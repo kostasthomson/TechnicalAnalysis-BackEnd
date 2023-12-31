@@ -44,7 +44,7 @@ public class GitHubCommit implements GitHubEntity {
         this.date = offsetDateTime.format(isoFormatter);
 
         this.author = DatabaseController.findCollaborator(commitInfo.get(1));
-//        this.files = new GitHubFileList(commitFiles);
+        this.files = new GitHubFileList(commitFiles, this);
     }
 
 
