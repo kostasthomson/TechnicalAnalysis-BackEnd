@@ -38,8 +38,7 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
 
     @Override
     public void add(GitHubEntity object) {
-        GitHubCollaborator collaborator = (GitHubCollaborator) object;
-        this.list.put(collaborator.getId(), collaborator);
+        
     }
 
     @Override

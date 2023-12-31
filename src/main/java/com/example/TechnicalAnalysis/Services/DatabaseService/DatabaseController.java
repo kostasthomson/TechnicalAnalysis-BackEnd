@@ -30,6 +30,11 @@ public abstract class DatabaseController {
     }
 
     public static GitHubCollaborator findCollaborator(String name) {
-        return dbReader.findCollaborator(collaboratorRepository, name.replace(" ", ""));
+        StringBuilder editedName = new StringBuilder(name.replace(" ", ""));
+        GitHubCollaborator collaborator = dbReader.findCollaborator(collaboratorRepository, editedName.toString());
+        if (collaborator == null) {
+            collaborator = dbReader.findCollaborator(collaboratorRepository, editedName.toString().toLowerCase());
+        }
+        return collaborator;
     }
 }
