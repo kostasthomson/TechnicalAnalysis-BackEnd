@@ -1,26 +1,40 @@
 package com.example.TechnicalAnalysis.Services.DatabaseService;
 
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
+import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubCollaboratorList;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils.GitHubCommitList;
 
-public class DatabaseController {
+public abstract class DatabaseController {
     private static final DatabaseWriter dbWriter = new DatabaseWriter();
+    private static final DatabaseReader dbReader = new DatabaseReader();
+    private static CommitRepository commitRepository;
+    private static CollaboratorRepository collaboratorRepository;
 
-//    private final Map<MapKeys, GenericRepository<?, ?>> repositories;
+    public static void addCommitRepository(CommitRepository repo) {
+        commitRepository = repo;
+    }
 
-//    public DatabaseController(Map<MapKeys, GenericRepository<?, ?>> repos) {
-//        this.repositories = repos;
-//    }
+    public static void addCollaboratorRepository(CollaboratorRepository repo) {
+        collaboratorRepository = repo;
+    }
 
-//    public void write(Map<MapKeys, GitHubEntityCollection> map) {
-//        MapKeys key;
-//        key = MapKeys.COLLABORATORS;
-//        this.dbWriter.saveCollaborators((CollaboratorRepository) this.repositories.get(key), map.get(key));
-//        key = MapKeys.COMMITS;
-//        this.dbWriter.saveCommits((CommitRepository) this.repositories.get(key), map.get(key));
-//    }
+    public static void WriteCommits(GitHubCommitList list) {
+        dbWriter.saveCommits(commitRepository, list);
+    }
 
-    public static void WriteCommits(CommitRepository repo, GitHubCommitList list) {
-        dbWriter.saveCommits(repo, list);
+
+    public static void WriteCollaborators(GitHubCollaboratorList list) {
+        dbWriter.saveCollaborators(collaboratorRepository, list);
+    }
+
+    public static GitHubCollaborator findCollaborator(String name) {
+        StringBuilder editedName = new StringBuilder(name.replace(" ", ""));
+        GitHubCollaborator collaborator = dbReader.findCollaborator(collaboratorRepository, editedName.toString());
+        if (collaborator == null) {
+            collaborator = dbReader.findCollaborator(collaboratorRepository, editedName.toString().toLowerCase());
+        }
+        return collaborator;
     }
 }

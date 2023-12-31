@@ -2,6 +2,7 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -40,6 +41,11 @@ public class GitHubCommitList extends GitHubEntityCollection {
                 System.out.println("Wrong Date Format...");
             }
         }
+    }
+
+    @Override
+    public void addAll(JsonNode array) {
+
     }
 
     @Override

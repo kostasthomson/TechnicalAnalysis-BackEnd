@@ -3,6 +3,8 @@ package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
 import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
 import java.util.Iterator;
@@ -34,6 +36,11 @@ public class GitHubFileList extends GitHubEntityCollection {
     }
 
     @Override
+    public void addAll(JsonNode array) {
+
+    }
+
+    @Override
     public void add(GitHubEntity object) {
         GitHubFile commit = (GitHubFile) object;
         this.list.put(commit.getName(), commit);
@@ -47,6 +54,7 @@ public class GitHubFileList extends GitHubEntityCollection {
     }
 
     @Override
+    @NotNull
     public Iterator<GitHubEntity> iterator() {
         return list.values().iterator();
     }

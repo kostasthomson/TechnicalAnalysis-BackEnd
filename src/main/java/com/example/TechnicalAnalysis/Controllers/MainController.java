@@ -7,6 +7,7 @@ import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.R
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubCLI;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubInterpreter;
 import com.example.TechnicalAnalysis.Services.GitHubService.GitHubLogReader;
+import com.example.TechnicalAnalysis.Services.GitHubService.GitHubWeb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,12 @@ public class MainController {
         this.commitRepository.deleteAll();
         this.fileRepository.deleteAll();
 
+        DatabaseController.addCommitRepository(commitRepository);
+        DatabaseController.addCollaboratorRepository(collaboratorRepository);
+
+        // Initialize repository collaborators
+        DatabaseController.WriteCollaborators(GitHubWeb.requestCollaborators());
+
         // Initialize repository specific attributes
         GitHubCLI.setWorkingRepository(link);
 
@@ -48,7 +55,7 @@ public class MainController {
         GitHubInterpreter.CreateCommitsList();
 
         // Store commits to repository
-        DatabaseController.WriteCommits(commitRepository, GitHubInterpreter.getCommitsList());
+        DatabaseController.WriteCommits(GitHubInterpreter.getCommitsList());
 
         System.out.println("Set up complete " + link);
     }

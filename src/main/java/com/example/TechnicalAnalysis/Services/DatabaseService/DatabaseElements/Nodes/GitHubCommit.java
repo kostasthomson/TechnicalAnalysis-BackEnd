@@ -45,7 +45,6 @@ public class GitHubCommit implements GitHubEntity {
 
         this.author = DatabaseController.findCollaborator(commitInfo.get(1));
         this.files = new GitHubFileList(commitFiles, this);
-
     }
 
 

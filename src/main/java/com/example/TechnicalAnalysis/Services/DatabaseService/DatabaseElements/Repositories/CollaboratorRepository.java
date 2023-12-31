@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RepositoryRestResource(collectionResourceRel = "collaborators", path = "collaborators")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
-public interface CollaboratorRepository extends GenericRepository<GitHubCollaborator, String>, PagingAndSortingRepository<GitHubCollaborator, String>, CrudRepository<GitHubCollaborator, String> {
-    GitHubCollaborator findByEmail(@Param("email") String email);
+public interface CollaboratorRepository extends
+        PagingAndSortingRepository<GitHubCollaborator, String>,
+        CrudRepository<GitHubCollaborator, String> {
+    GitHubCollaborator findByName(@Param("name") String name);
 }
 

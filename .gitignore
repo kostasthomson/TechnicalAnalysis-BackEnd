@@ -36,8 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-application-dev.properties
-
 /src/main/java/com/example/TechnicalAnalysis/Sonar/*
 
 /ClonedRepos/*
+
+*.properties
