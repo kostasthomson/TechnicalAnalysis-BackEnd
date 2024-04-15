@@ -15,14 +15,19 @@ repositories {
     mavenCentral()
 }
 
+configurations.configureEach {
+    exclude group: "commons-logging", module: "commons-logging"
+}
+
 dependencies {
     implementation "org.springframework.boot:spring-boot-devtools"
-//    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-rest:2.5.5'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.jetbrains:annotations:24.0.0'
+    implementation 'com.mashape.unirest:unirest-java:1.4.9'
 //	runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

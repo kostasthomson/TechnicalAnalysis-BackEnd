@@ -1,8 +1,8 @@
 package com.example.TechnicalAnalysis.Controllers;
 
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.FileRepository;
+import com.example.TechnicalAnalysis.Models.GitHubFile;
+import com.example.TechnicalAnalysis.Repositories.FileRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

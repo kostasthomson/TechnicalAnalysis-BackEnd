@@ -1,7 +1,7 @@
 package com.example.TechnicalAnalysis.Controllers;
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CollaboratorRepository;
+import com.example.TechnicalAnalysis.Models.GitHubCollaborator;
+import com.example.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

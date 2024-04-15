@@ -1,9 +1,8 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
+package com.example.TechnicalAnalysis.Models;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 @Node("File")
@@ -12,20 +11,24 @@ public class GitHubFile implements GitHubEntity {
     @GeneratedValue(UUIDStringGenerator.class)
     private String node_id;
     private String name;
-    @Relationship(type = "CHANGED_IN", direction = Relationship.Direction.OUTGOING)
-    private GitHubCommit commit;
+    private Integer complexity;
+    private Integer loc;
+    private Integer td;
 
     public GitHubFile() {
         // default, no argument constructor
     }
 
     public GitHubFile(String fileName) {
-        this.name = fileName;
+        String[] nameArray = fileName.split("/");
+        this.name = nameArray[nameArray.length - 1];
     }
 
-    public GitHubFile(String fileName, GitHubCommit commit) {
-        this.name = fileName;
-        this.commit = commit;
+    public GitHubFile(String name, Integer complexity, Integer loc, Integer td) {
+        this.name = name;
+        this.complexity = complexity;
+        this.loc = loc;
+        this.td = td;
     }
 
     public boolean isJava() {
@@ -48,12 +51,28 @@ public class GitHubFile implements GitHubEntity {
         this.node_id = node_id;
     }
 
-    public GitHubCommit getCommit() {
-        return this.commit;
+    public Integer getComplexity() {
+        return complexity;
     }
 
-    public void setCommit(GitHubCommit newCommit) {
-        this.commit = newCommit;
+    public void setComplexity(Integer complexity) {
+        this.complexity = complexity;
+    }
+
+    public Integer getLoc() {
+        return loc;
+    }
+
+    public void setLoc(Integer loc) {
+        this.loc = loc;
+    }
+
+    public Integer getTd() {
+        return td;
+    }
+
+    public void setTd(Integer td) {
+        this.td = td;
     }
 
     @Override

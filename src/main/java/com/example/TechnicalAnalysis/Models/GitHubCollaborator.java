@@ -1,19 +1,14 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes;
+package com.example.TechnicalAnalysis.Models;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 
 @Node("Collaborator")
 public class GitHubCollaborator implements GitHubEntity {
 
     @Id
-    @GeneratedValue(UUIDStringGenerator.class)
-    private String node_id;
-
     private String name;
 
     public GitHubCollaborator() {
@@ -38,13 +33,5 @@ public class GitHubCollaborator implements GitHubEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getNode_id() {
-        return node_id;
-    }
-
-    public void setNode_id(String node_id) {
-        this.node_id = node_id;
     }
 }

@@ -1,7 +1,7 @@
 package com.example.TechnicalAnalysis.Controllers;
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Repositories.CommitRepository;
+import com.example.TechnicalAnalysis.Models.GitHubCommit;
+import com.example.TechnicalAnalysis.Repositories.CommitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

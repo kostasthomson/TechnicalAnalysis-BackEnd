@@ -1,6 +1,6 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
+package com.example.TechnicalAnalysis.Utils.Lists;
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.example.TechnicalAnalysis.Models.GitHubEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.json.simple.JSONArray;
 

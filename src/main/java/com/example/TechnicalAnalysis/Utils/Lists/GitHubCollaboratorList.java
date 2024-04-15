@@ -1,16 +1,23 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
+package com.example.TechnicalAnalysis.Utils.Lists;
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCollaborator;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
+import com.example.TechnicalAnalysis.Models.GitHubCollaborator;
+import com.example.TechnicalAnalysis.Models.GitHubEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class GitHubCollaboratorList extends GitHubEntityCollection {
+    public static GitHubCollaboratorList convert(List<GitHubCollaborator> collaborators) {
+        GitHubCollaboratorList list = new GitHubCollaboratorList();
+        collaborators.forEach(list::add);
+        return list;
+    }
+
     @Override
     public GitHubEntity get(String key) {
         try {
@@ -38,7 +45,7 @@ public class GitHubCollaboratorList extends GitHubEntityCollection {
 
     @Override
     public void add(GitHubEntity object) {
-        
+
     }
 
     @Override

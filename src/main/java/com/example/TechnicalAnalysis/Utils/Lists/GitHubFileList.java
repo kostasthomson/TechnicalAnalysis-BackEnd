@@ -1,23 +1,25 @@
-package com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseUtils;
+package com.example.TechnicalAnalysis.Utils.Lists;
 
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubCommit;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubEntity;
-import com.example.TechnicalAnalysis.Services.DatabaseService.DatabaseElements.Nodes.GitHubFile;
+import com.example.TechnicalAnalysis.Models.GitHubEntity;
+import com.example.TechnicalAnalysis.Models.GitHubFile;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class GitHubFileList extends GitHubEntityCollection {
-    public GitHubFileList(List<String> commitFiles, GitHubCommit commit) {
-        super();
+    public static List<GitHubFile> parseToList(List<String> commitFiles) {
+        List<GitHubFile> files = new ArrayList<>();
         commitFiles.stream()
-                .map(fileName -> new GitHubFile(fileName, commit))
-                .forEach(file -> list.put(file.getName(), file));
+                .map(GitHubFile::new)
+                .filter(GitHubFile::isJava) // Get only java files
+                .forEach(files::add);
+        return files;
     }
 
     @Override
