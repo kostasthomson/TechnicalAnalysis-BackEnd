@@ -5,12 +5,15 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+import java.util.List;
+
 @Node("File")
 public class GitHubFile implements GitHubEntity {
     @Id
     @GeneratedValue(UUIDStringGenerator.class)
     private String node_id;
     private String name;
+    private String path;
     private Integer complexity;
     private Integer loc;
     private Integer td;
@@ -20,6 +23,7 @@ public class GitHubFile implements GitHubEntity {
     }
 
     public GitHubFile(String fileName) {
+        this.path = fileName;
         String[] nameArray = fileName.split("/");
         this.name = nameArray[nameArray.length - 1];
     }
@@ -73,6 +77,14 @@ public class GitHubFile implements GitHubEntity {
 
     public void setTd(Integer td) {
         this.td = td;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

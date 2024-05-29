@@ -1,7 +1,6 @@
 package com.Server.TechnicalAnalysis.Services.REST;
 
 import com.Server.TechnicalAnalysis.Enums.AnalysisMetrics;
-import com.Server.TechnicalAnalysis.Models.GitHubCollaborator;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubEntity;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
@@ -10,17 +9,20 @@ import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.FileRepository;
 import com.Server.TechnicalAnalysis.Repositories.ProjectRepository;
 import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
+import com.Server.TechnicalAnalysis.Services.CLI.GitHubCLI;
 import com.Server.TechnicalAnalysis.Services.DB.DatabaseController;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreter;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogReader;
 import com.Server.TechnicalAnalysis.Services.Web.GitHubWeb;
 import com.Server.TechnicalAnalysis.Utils.Analysis.SonarAnalysis;
+import com.Server.TechnicalAnalysis.Utils.GitHubCollaboratorBuilder;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -32,11 +34,11 @@ import java.util.Map;
 public class InitializationService {
     private final Logger logger = LoggerFactory.getLogger(InitializationService.class);
 
-    //    @Value("${sonar.qube.url}")
+    @Value("${sonar.qube.url}")
     private String sonarQubeUrl;
-    //    @Value("${sonar.qube.username}")
+    @Value("${sonar.qube.username}")
     private String sonarQubeUsername;
-    //    @Value("${sonar.qube.password}")
+    @Value("${sonar.qube.password}")
     private String sonarQubePassword;
 
     @Autowired
@@ -55,6 +57,8 @@ public class InitializationService {
     @Autowired
     private GitCLI gitCLI;
     @Autowired
+    private GitHubCLI gitHubCLI;
+    @Autowired
     private GitLogReader gitLogReader;
     @Autowired
     private GitLogInterpreter gitLogInterpreter;
@@ -67,14 +71,13 @@ public class InitializationService {
         this.dbController.eraseAll();
     }
 
-    // todo: do analysis per week (first commit of the week)
-    private void analyzeCommits(GitHubCommitList commits, String repositoryName) {
-        for (GitHubEntity ghe : commits) {
-            GitHubCommit commit = (GitHubCommit) ghe;
+    private void analyzeCommits(GitHubCommitList commits, String repositoryName, String repositoryOwner) {
+        for (GitHubCommit commit : commits) {
+            this.gitHubCLI.addPullRequestTags(commit);
             try {
                 SonarAnalysis sonarAnalysis = new SonarAnalysis(
-                        "kostasthomson",
-                        "ClonedRepos\\" + repositoryName,
+                        repositoryOwner,
+                        String.format("%s\\%s", this.gitCLI.getDirectory(), repositoryName),
                         commit.getSha(),
                         sonarQubeUrl,
                         sonarQubeUsername,
@@ -86,7 +89,7 @@ public class InitializationService {
                 List<GitHubFile> files = commit.getFiles();
                 for (GitHubFile file : files) {
                     try {
-                        Map<AnalysisMetrics, Integer> metrics = sonarAnalysis.getFileMetricFromSonarQube(file.getName());
+                        Map<AnalysisMetrics, Integer> metrics = sonarAnalysis.getFileMetricFromSonarQube(file.getPath());
                         file.setComplexity(metrics.get(AnalysisMetrics.COMPLEXITY));
                         file.setTd(metrics.get(AnalysisMetrics.TD));
                         file.setLoc(metrics.get(AnalysisMetrics.LOC));
@@ -104,14 +107,15 @@ public class InitializationService {
         int i = 3;
         while (i-- != 0) {
             try {
-                FileUtils.cleanDirectory(new File("ClonedRepos"));
+                FileUtils.cleanDirectory(new File("Repositories"));
                 break;
             } catch (IOException e) {
                 this.logger.warn("startInitialization: Repository directory deletion failed");
             }
         }
     }
-
+    // todo: fix error handling
+    // todo: fix analysis on existing projects
     public void startInitialization(String link) {
         // Add repositories to DatabaseController
         this.addRepositories();
@@ -121,26 +125,24 @@ public class InitializationService {
         String repositoryName = splitLink[splitLink.length - 1];
         String repositoryOwner = splitLink[splitLink.length - 2];
 
+        this.gitCLI.setWorkingRepository(repositoryName);
+        this.gitCLI.cloneRepository(link);
+
         // Request collaborators
-        GitHubCollaboratorList collaborators = this.gitHubWeb.makeInitialRequest(repositoryOwner, repositoryName);
-        try {
-            List<GitHubCollaborator> colls = this.gitCLI.LogAuthors(repositoryName);
-            colls.forEach(c -> this.logger.info(String.valueOf(c)));
-        } catch (Exception e) {
-            this.logger.error(e.getMessage());
-        }
-        // Save collaborators
-        this.dbController.writeCollaborators(collaborators);
+        File f = this.gitCLI.LogAuthors();
+        List<String[]> logAuthors = this.gitLogReader.readCollaborators(f);
+        GitHubCollaboratorList collaborators = this.gitLogInterpreter.createCollaboratorList(logAuthors);
 
         // Request commits
-        File commitsLogFile = this.gitCLI.createLog(link);
-        List<List<String>> commitsLogList = this.gitLogReader.readLogFile(commitsLogFile);
+        File commitsLogFile = this.gitCLI.LogCommits();
+        List<List<String>> commitsLogList = this.gitLogReader.readCommits(commitsLogFile);
         GitHubCommitList commits = this.gitLogInterpreter.createCommitsList(commitsLogList);
+        commits.filterPerWeek();
 
-        // Analyze commits
-        this.analyzeCommits(commits, repositoryName);
+        this.analyzeCommits(commits, repositoryName, repositoryOwner);
 
-        // Save Project entity and commits
+        // Save entities
+        this.dbController.writeCollaborators(collaborators);
         this.dbController.createProjectNode(repositoryName, commits.getLatest());
         this.dbController.writeCommits(commits);
 

@@ -1,156 +1,79 @@
 package com.Server.TechnicalAnalysis.Services.CLI;
 
-import com.Server.TechnicalAnalysis.Models.GitHubCollaborator;
 import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 @Service
-public class GitCLI {
+public class GitCLI extends SimpleCLI {
     private final Logger logger = LoggerFactory.getLogger(GitCLI.class);
-    private final String CLONED_DIR_PATH = "./ClonedRepos";
-    private final File CLONED_DIR = new File(CLONED_DIR_PATH);
-    private String repoLink;
-    private String repoName;
-    private List<String> repoLinkList = new ArrayList<>();
-    private File repoDir;
-    private File repoLogFile;
 
-    private void setRepositoryName() {
-        this.repoName = this.repoLinkList.get(this.repoLinkList.size() - 1);
-    }
-
-    private void setRepositoryDirectory() {
-        this.setRepositoryName();
-        this.repoDir = new File(String.format("%s/%s", this.CLONED_DIR_PATH, this.repoName));
-    }
-
-    private int ExecuteCommand(String gitCommand) throws IOException, InterruptedException {
-        return this.ExecuteCommand(gitCommand, null, false);
-    }
-
-    private int ExecuteCommand(String gitCommand, File workingDir) throws IOException, InterruptedException {
-        return this.ExecuteCommand(gitCommand, workingDir, false);
-    }
-
-    private int ExecuteCommand(String gitCommand, boolean redirectOutput) throws IOException, InterruptedException {
-        return this.ExecuteCommand(gitCommand, null, redirectOutput);
-    }
-
-    private int ExecuteCommand(String gitCommand, File workingDir, boolean redirectOutput) throws IOException, InterruptedException {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-
-        if (TechnicalAnalysisApplication.isWindows()) {
-            processBuilder.command("cmd.exe", "/c", gitCommand); // For Windows systems
-        } else {
-            processBuilder.command("bash", "-c", gitCommand); // For Unix-like systems
-        }
-
-        // Set the working directory where the git command will be executed
-        processBuilder.directory(workingDir);
-
-        // Set the output stream where command's results will be displayed
-        if (redirectOutput)
-            processBuilder.redirectOutput(this.repoLogFile);
-        else
-            processBuilder.inheritIO();
-
-        // Start the process
-        Process process = processBuilder.start();
-
-        // Wait for the process to complete
-        return process.waitFor();
-    }
-
-    private void setWorkingRepository(String link) {
-        this.repoLink = link;
-        this.repoLinkList = Arrays.stream(this.repoLink.split("/")).toList();
-        this.setRepositoryDirectory();
-    }
-
-    private void CloneRepository() {
+    public void cloneRepository(String link) {
         // Define the Git clone command
-        String gitCloneCommand = "git clone " + this.repoLink;
+        String gitCloneCommand = "git clone " + link;
         try {
             // Check if directory exists and/or create directory
-            if (this.repoDir.mkdirs()) {
-                // Create a ProcessBuilder for the Git clone command
-                int exitCode = this.ExecuteCommand(gitCloneCommand, this.CLONED_DIR);
-
-                // Check the exit code
-                if (exitCode == 0) {
-                    logger.info("Git clone successful.");
-                } else {
-                    logger.warn("Git clone failed with exit code: {}", exitCode);
-                }
-            } else {
-                logger.warn("Git repository already cloned");
-            }
+            if (!this.repoDir.mkdirs()) throw new ProjectExistsException();
+            // Create a ProcessBuilder for the Git clone command
+            int exitCode = this.ExecuteCommandInDirectory(gitCloneCommand, this.REPOSITORIES_DIR);
+            // Check the exit code
+            if (exitCode != 0) throw new CommandExecutionFailedException(exitCode);
+            logger.info("Git clone successful.");
         } catch (IOException | InterruptedException e) {
             logger.error("Exception occur while cloning repository");
+        } catch (CommandExecutionFailedException e) {
+            logger.error("Git clone failed with exit code {}", e.getExitCode());
+        } catch (ProjectExistsException e) {
+            logger.warn("Git repository already cloned");
         }
     }
 
-    private File LogCommits() {
-        // Git command for logging all commits in a csv format following with the files that are related to commit
-        String gitLogCommand = "git --no-pager log --pretty=format:\"%H, %an, %ae %cn, %ce, %ad, %s\" --name-only";
+    private int runCommand(String command) {
         try {
-            // Create repository's log file
-            this.repoLogFile = new File(String.format("%s/%s.txt", this.CLONED_DIR_PATH, this.repoName));
-
             // Create a ProcessBuilder for the Git log command
-            int exitCode = this.ExecuteCommand(gitLogCommand, this.repoDir, true);
-
+            int exitCode = this.ExecuteCommandInOutput(command);
             // Check the exit code
-            if (exitCode == 0) {
-                logger.info("Git log successful.");
-                return this.repoLogFile;
-            } else {
-                logger.warn("Git log failed with exit code: {}", exitCode);
-            }
+            if (exitCode != 0) throw new CommandExecutionFailedException(exitCode);
+            logger.info("Command completed: {}", command);
+            return 0;
         } catch (IOException | InterruptedException e) {
-            logger.error("Error while logging commits");
+            logger.error("Unexpected error: {}", command);
+        } catch (CommandExecutionFailedException e) {
+            logger.error("Command execution failed with exit code {}", e.getExitCode());
+        }
+        return -1;
+    }
+
+    public File LogCommits() {
+        String gitLogCommits = "git --no-pager log --pretty=format:\"%H, %an, %ae %cn, %ce, %ad, %s\" --name-only";
+        return (this.runCommand(gitLogCommits) == 0) ? this.repoLog : null;
+    }
+
+    public File LogAuthors() {
+        // Create repository's log file
+        /*
+        If no revisions are passed on the command line and either standard input
+        is not a terminal or there is no current branch, git shortlog will output
+        a summary of the log read from standard input, without reference to
+        the current repository.
+         */
+        try {
+            this.ExecuteCommand("git branch");
+            BufferedReader stdInput = new BufferedReader(new
+                    InputStreamReader(this.gitProcess.getInputStream()));
+            String mainBranchName = stdInput.readLine().replace("*", "").trim();
+            return (this.runCommand("git shortlog -se --branches " + mainBranchName) == 0) ? this.repoLog : null;
+        } catch (Exception e) {
+            logger.error("Unexpected error: {}", e.getMessage());
         }
         return null;
-    }
-
-    public List<GitHubCollaborator> LogAuthors(String workdir) throws IOException, InterruptedException {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        String gitCommand = "git shortlog -sne";
-
-        if (TechnicalAnalysisApplication.isWindows()) {
-            processBuilder.command("cmd.exe", "/c", gitCommand); // For Windows systems
-        } else {
-            processBuilder.command("bash", "-c", gitCommand); // For Unix-like systems
-        }
-
-        // Set the working directory where the git command will be executed
-        processBuilder.directory(new File(this.CLONED_DIR_PATH + workdir));
-
-        // Start the process
-        Process process = processBuilder.start();
-
-        // Wait for the process to complete
-        process.waitFor();
-        List<GitHubCollaborator> authors = new ArrayList<>();
-        String output = new String(process.getInputStream().readAllBytes());
-        for (String s : output.split("\n")) {
-            String[] row = s.trim().split(" ");
-            authors.add(new GitHubCollaborator(row[1] + " " + row[2], row[4].substring(1, row[4].length() - 1)));
-        }
-        return authors;
-    }
-
-    public File createLog(String link) {
-        this.setWorkingRepository(link);
-        this.CloneRepository();
-        return this.LogCommits();
     }
 }

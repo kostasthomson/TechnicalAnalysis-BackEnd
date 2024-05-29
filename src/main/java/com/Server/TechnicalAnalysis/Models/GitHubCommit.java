@@ -5,8 +5,9 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Node("Commit")
 public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
@@ -18,33 +19,28 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
     private Integer loc;
     private Integer td;
     @Relationship(type = "COMMITTED_BY", direction = Relationship.Direction.OUTGOING)
-    private List<GitHubCollaborator> authors = new ArrayList<>();
+    private GitHubCollaborator author;
     @Relationship(type = "CHANGED_IN", direction = Relationship.Direction.INCOMING)
     private List<GitHubFile> files;
     private List<String> tags;
+
+    public GitHubCommit(String sha, String message, String date,
+                        GitHubCollaborator author, List<GitHubFile> files) {
+        this.sha = sha;
+        this.message = message;
+        this.date = date;
+        this.author = author;
+        this.files = files;
+    }
 
     public GitHubCommit(String sha, String message, String date,
                         GitHubCollaborator author, List<GitHubFile> files, List<String> tags) {
         this.sha = sha;
         this.message = message;
         this.date = date;
-        this.authors.add(author);
+        this.author = author;
         this.files = files;
         this.tags = tags;
-    }
-
-    public GitHubCommit(String sha, String message, String date,
-                        List<GitHubCollaborator> authors, List<GitHubFile> files, List<String> tags) {
-        this.sha = sha;
-        this.message = message;
-        this.date = date;
-        this.authors = authors;
-        this.files = files;
-        this.tags = tags;
-    }
-
-    public void addAuthor(GitHubCollaborator author) {
-        this.authors.add(author);
     }
 
     @Override
@@ -54,12 +50,22 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
 
     @Override
     public int compareTo(GitHubCommit commit) {
-        return LocalDateTime.parse(getDate().split("\\+")[0]).compareTo(LocalDateTime.parse(commit.getDate().split("\\+")[0]));
+        LocalDateTime thisDate = LocalDateTime.parse(this.date.substring(0, 19));
+        LocalDateTime otherDate = LocalDateTime.parse(commit.date.substring(0, 19));
+        return thisDate.compareTo(otherDate);
     }
 
     @Override
     public String toString() {
         return "Commit:\n\t\tsha:" + this.sha + "\n\t\tdate:" + this.date + "\n\t\tfiles:" + this.files;
+    }
+
+    public GitHubCollaborator getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(GitHubCollaborator author) {
+        this.author = author;
     }
 
     public String getSha() {
@@ -84,14 +90,6 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public List<GitHubCollaborator> getAuthors() {
-        return this.authors;
-    }
-
-    public void setAuthors(List<GitHubCollaborator> authors) {
-        this.authors = authors;
     }
 
     public List<GitHubFile> getFiles() {

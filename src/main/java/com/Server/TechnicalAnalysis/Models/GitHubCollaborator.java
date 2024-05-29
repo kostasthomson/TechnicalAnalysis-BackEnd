@@ -9,6 +9,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 public class GitHubCollaborator implements GitHubEntity {
 
     @Id
+    private String email;
     private String name;
 
     public GitHubCollaborator() {
@@ -17,6 +18,7 @@ public class GitHubCollaborator implements GitHubEntity {
 
     public GitHubCollaborator(String name, String email) {
         this.name = name.replace(" ", "").toLowerCase();
+        this.email = email;
     }
 
     public GitHubCollaborator(JsonNode node) {
@@ -25,7 +27,7 @@ public class GitHubCollaborator implements GitHubEntity {
 
     @Override
     public String toString() {
-        return "Collaborator: \n\t{\n\t\tname:" + this.name + "\n\t}";
+        return "Collaborator {name: " + this.name + ", email: " + this.email + "}";
     }
 
     public String getName() {
@@ -35,4 +37,8 @@ public class GitHubCollaborator implements GitHubEntity {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setEmail(String email) { this.email = email;}
+
+    public String getEmail() { return this.email; }
 }

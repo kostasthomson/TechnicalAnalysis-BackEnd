@@ -55,13 +55,8 @@ public class DatabaseController {
         this.dbWriter.saveCollaborators(this.collaboratorRepository, list);
     }
 
-    public GitHubCollaborator findCollaborator(String name) {
-        StringBuilder editedName = new StringBuilder(name.replace(" ", ""));
-        GitHubCollaborator collaborator = this.dbReader.findCollaborator(this.collaboratorRepository, editedName.toString());
-        if (collaborator == null) {
-            collaborator = this.dbReader.findCollaborator(this.collaboratorRepository, editedName.toString().toLowerCase());
-        }
-        return collaborator;
+    public GitHubCollaborator findCollaborator(String key) {
+        return this.dbReader.findCollaborator(this.collaboratorRepository, key.replace(" ", ""));
     }
 
     public void eraseAll() {

@@ -12,8 +12,8 @@ import java.util.List;
 @RepositoryRestResource(collectionResourceRel = "collaborators", path = "collaborators")
 @CrossOrigin(origins = "http://localhost:3000") //enable cors
 public interface CollaboratorRepository extends Neo4jRepository<GitHubCollaborator, String> {
+    GitHubCollaborator findByEmail(@Param("email") String email);
     GitHubCollaborator findByName(@Param("name") String name);
-
     @NotNull
     List<GitHubCollaborator> findAll();
 }

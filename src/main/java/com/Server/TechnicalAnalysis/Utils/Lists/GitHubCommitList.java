@@ -9,76 +9,75 @@ import org.json.simple.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
-public class GitHubCommitList extends GitHubEntityCollection {
+public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
     public void addAll(List<GitHubCommit> commits) {
-        commits.forEach(commit -> list.put(commit.getSha(), commit));
-    }
-
-    public void addAll(JSONArray array) {
-        for (Object o : array) {
-            JSONObject json = (JSONObject) o;
-            String sha = json.get("sha").toString();
-            JSONObject commit = (JSONObject) json.get("commit");
-            JSONObject author = (JSONObject) json.get("author");
-            String author_id = "-1";
-            if (author != null) {
-                System.out.println(author.toJSONString());
-                Long id = (Long) author.get("id");
-                if (id != null)
-                    author_id = id.toString();
-            }
-            String date_text = ((JSONObject) commit.get("author")).get("date").toString();
-            try {
-                Date date = new SimpleDateFormat("yyyy-MM-dd").parse(date_text);
-//                list.put(sha, new GitHubCommit(sha, author_id));
-            } catch (ParseException e) {
-                System.out.println("Wrong Date Format...");
-            }
-        }
+        list.addAll(commits);
+        list.forEach(commit -> map.put(commit.getSha(), list.indexOf(commit)));
     }
 
     @Override
-    public void addAll(JsonNode array) {
-
+    public boolean add(GitHubCommit object) {
+        map.put(object.getSha(), list.size()-1);
+        return list.add(object);
     }
 
     @Override
-    public void add(GitHubEntity object) {
-        GitHubCommit commit = (GitHubCommit) object;
-        this.list.put(commit.getSha(), commit);
-    }
-
-    public GitHubCommit get(String sha) {
-        try {
-            return (GitHubCommit) this.list.get(sha);
-        } catch (Exception ignored) {
-            System.out.println("No commit match");
-        }
-        return null;
-    }
-
-    @Override
-    @NotNull
-    public Iterator<GitHubEntity> iterator() {
-        return list.values().iterator();
-    }
-
-    @Override
-    public void forEach(Consumer<? super GitHubEntity> action) {
-        list.values().forEach(action);
-    }
-
-    @Override
-    public Spliterator<GitHubEntity> spliterator() {
-        return list.values().spliterator();
+    public boolean remove(Object o) {
+        return map.remove(((GitHubCommit) o).getSha(), list.indexOf(o)) && list.remove(o);
     }
 
     public GitHubCommit getLatest() {
-        Object[] commits = list.values().toArray();
-        Arrays.sort(commits, Collections.reverseOrder());
-        return (GitHubCommit) commits[0];
+        return list.get(list.size()-1);
+    }
+
+    public void filterPerWeek() {
+        int firstIndex = list.size()-1;
+        LocalDate firstDate = LocalDate.parse(list.get(firstIndex).getDate(), DateTimeFormatter.ISO_DATE_TIME);
+        LocalDate endOfWeek = firstDate.minusWeeks(1);
+        int i = firstIndex-1;
+        LocalDate currentDate;
+        while (i >= 0) {
+            currentDate = LocalDate.parse(list.get(i).getDate(), DateTimeFormatter.ISO_DATE_TIME);
+            if (currentDate.isBefore(endOfWeek) || currentDate.isEqual(endOfWeek)) { // in different week
+                List<GitHubCommit> toRemove = list.subList(i + 1, firstIndex);
+                toRemove.forEach(commit -> map.remove(commit.getSha()));
+                list.removeAll(toRemove);
+                firstIndex = i;
+                firstDate = currentDate;
+                endOfWeek = firstDate.minusWeeks(1);
+            }
+            i--;
+        }
+
+//        HashMap<Integer, GitHubCommit> commitMap = new HashMap<>();
+//        HashMap<Integer, LocalDate> weekMap = new HashMap<>();
+//        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+//        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+//            GitHubCommit commit = list.get(entry.getValue());
+//            LocalDate dateObj = LocalDate.parse(commit.getDate(), DateTimeFormatter.ISO_DATE_TIME);
+//            int week = dateObj.get(weekFields.weekOfWeekBasedYear());
+//            LocalDate hashDate = weekMap.putIfAbsent(week, dateObj);
+//            if (hashDate == null) {
+//                commitMap.put(week, commit);
+//                continue;
+//            }
+//            if (hashDate.isBefore(dateObj)) {
+//                weekMap.put(week, dateObj);
+//                commitMap.put(week, commit);
+//            }
+//        }
+//        Map<String, GitHubEntity> validCommits = new HashMap<>();
+//        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+//            GitHubCommit commit = list.get(entry.getValue());
+//            if (commitMap.containsValue(commit)) validCommits.put(entry.getKey(), entry.getValue());
+//        }
+//        list = validCommits;
     }
 }

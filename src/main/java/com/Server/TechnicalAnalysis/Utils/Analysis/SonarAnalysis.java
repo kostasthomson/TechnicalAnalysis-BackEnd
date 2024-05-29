@@ -188,17 +188,17 @@ public class SonarAnalysis {
         }
     }
 
-    public Map<AnalysisMetrics, Integer> getFileMetricFromSonarQube(String fileName) {
+    public Map<AnalysisMetrics, Integer> getFileMetricFromSonarQube(String filePath) {
         try {
             Map<AnalysisMetrics, Integer> metrics = new HashMap<>();
             Unirest.setTimeouts(0, 0);
             HttpResponse<String> response = Unirest
-                    .get(String.format("%s/api/measures/component?component=%s:%s:Project/%s&metricKeys=sqale_index,complexity,ncloc",
-                            this.sonarQubeUrl, this.projectOwner, this.repoName, fileName))
+                    .get(String.format("%s/api/measures/component?component=%s:%s:%s&metricKeys=sqale_index,complexity,ncloc",
+                            this.sonarQubeUrl, this.projectOwner, this.repoName, filePath))
                     .basicAuth(sonarQubeUser, sonarQubePassword)
                     .asString();
             if (response.getStatus() != 200)
-                logger.error("FileMetricFromSonarQube: Status code != 200");
+                logger.error("FileMetricFromSonarQube (Status code != 200): {}", response.getBody());
             else {
                 JSONArray jsonarr_1 = getJsonArray(response.getRawBody());
 

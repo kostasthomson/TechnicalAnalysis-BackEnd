@@ -1,18 +1,20 @@
 package com.Server.TechnicalAnalysis.Utils.Lists;
 
+import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubEntity;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONArray;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
-public class GitHubFileList extends GitHubEntityCollection {
+public class GitHubFileList extends GitHubEntityCollection<GitHubFile> {
+
+    public void addAll(List<GitHubFile> list) {
+        this.list.addAll(list);
+        list.forEach(file -> this.map.put(file.getName(), this.list.indexOf(file)));
+    }
+
     public static List<GitHubFile> parseToList(List<String> commitFiles) {
         List<GitHubFile> files = new ArrayList<>();
         commitFiles.stream()
@@ -23,51 +25,18 @@ public class GitHubFileList extends GitHubEntityCollection {
     }
 
     @Override
-    public GitHubEntity get(String key) {
-        return list.get(key);
+    public GitHubFile get(String key) {
+        return this.list.get(this.map.get(key));
     }
 
     @Override
-    public void addAll(JSONArray array) {
-//        for (Object o : array) {
-//            GitHubFile file = new GitHubFile((JSONObject) o);
-//            if (file.isJava()) {
-//                list.add(file);
-//            }
-//        }
+    public boolean add(GitHubFile object) {
+        this.map.put(object.getName(), this.list.size()-1);
+        return this.list.add(object);
     }
 
     @Override
-    public void addAll(JsonNode array) {
-
-    }
-
-    @Override
-    public void add(GitHubEntity object) {
-        GitHubFile commit = (GitHubFile) object;
-        this.list.put(commit.getName(), commit);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        list.forEach((key, value) -> stringBuilder.append(list.get(key)).append("\n"));
-        return stringBuilder.toString();
-    }
-
-    @Override
-    @NotNull
-    public Iterator<GitHubEntity> iterator() {
-        return list.values().iterator();
-    }
-
-    @Override
-    public void forEach(Consumer<? super GitHubEntity> action) {
-        list.values().forEach(action);
-    }
-
-    @Override
-    public Spliterator<GitHubEntity> spliterator() {
-        return list.values().spliterator();
+    public boolean remove(Object o) {
+        return this.map.remove(((GitHubFile) o).getName(), this.list.indexOf(o)) && this.list.remove(o);
     }
 }

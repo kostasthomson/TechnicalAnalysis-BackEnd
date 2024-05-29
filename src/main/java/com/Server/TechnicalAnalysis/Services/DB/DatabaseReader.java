@@ -10,8 +10,8 @@ import java.util.List;
 
 @Service
 public class DatabaseReader {
-    public GitHubCollaborator findCollaborator(CollaboratorRepository repository, String name) {
-        return repository.findByName(name);
+    public GitHubCollaborator findCollaborator(CollaboratorRepository repository, String key) {
+        return repository.findByEmail(key);
     }
 
     public List<GitHubCollaborator> getCollaborators(CollaboratorRepository repository) {

@@ -5,6 +5,8 @@ import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
 import com.Server.TechnicalAnalysis.Services.CLI.GitHubCLI;
 import com.Server.TechnicalAnalysis.Services.DB.DatabaseController;
+import com.Server.TechnicalAnalysis.Utils.GitHubCollaboratorBuilder;
+import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubFileList;
 import org.slf4j.Logger;
@@ -29,14 +31,13 @@ public class GitLogInterpreter {
     private DatabaseController dbController;
 
     private GitHubCommit createCommit(List<String> commitsList) {
-        List<String> commitInfo = Arrays.stream(commitsList.get(0).split(","))
-                .map(String::trim)
-                .toList();
         List<String> commitFiles = commitsList.subList(1, commitsList.size());
         List<GitHubFile> files = GitHubFileList.parseToList(commitFiles);
         if (files.isEmpty()) return null;
+        List<String> commitInfo = Arrays.stream(commitsList.get(0).split(","))
+                .map(String::trim)
+                .toList();
         String sha = commitInfo.get(0);
-        String message = commitInfo.get(5);
         String date = OffsetDateTime.parse(
                 commitInfo.get(4),
                 DateTimeFormatter.ofPattern(
@@ -44,9 +45,10 @@ public class GitLogInterpreter {
                         Locale.ENGLISH
                 )
         ).format(DateTimeFormatter.ISO_DATE_TIME);
-        GitHubCollaborator collaborator = this.dbController.findCollaborator(commitInfo.get(1));
-        List<String> tags = this.gitHubCLI.getPullRequestTags(sha);
-        return new GitHubCommit(sha, message, date, collaborator, files, tags);
+        String message = commitInfo.get(5);
+        // todo: duplicate contributors
+        GitHubCollaborator collaborator = GitHubCollaboratorBuilder.getCollaborator(commitInfo.get(3).toLowerCase());
+        return new GitHubCommit(sha, message, date, collaborator, files);
     }
 
     public GitHubCommitList createCommitsList(List<List<String>> logCommits) {
@@ -56,6 +58,7 @@ public class GitLogInterpreter {
                     logCommits.stream()
                             .map(this::createCommit)
                             .filter(Objects::nonNull)
+                            .sorted()
                             .toList()
             );
             int failed = this.gitHubCLI.getFailed();
@@ -67,5 +70,15 @@ public class GitLogInterpreter {
             logger.error("Cannot interpret logged commits: {}", npe.getMessage());
         }
         return null;
+    }
+
+    public GitHubCollaboratorList createCollaboratorList(List<String[]> logAuthors) {
+        try {
+            logAuthors.stream().map(GitHubCollaboratorBuilder::createCollaborator);
+            return GitHubCollaboratorBuilder.getList();
+        } catch (NullPointerException npe) {
+            logger.error("Cannot interpret logged authors: {}", npe.getMessage());
+            return null;
+        }
     }
 }
