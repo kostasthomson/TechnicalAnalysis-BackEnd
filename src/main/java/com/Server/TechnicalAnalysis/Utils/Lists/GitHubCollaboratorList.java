@@ -28,7 +28,6 @@ public class GitHubCollaboratorList extends GitHubEntityCollection<GitHubCollabo
         }
     }
 
-    //todo: fix duplicates
     @Override
     public boolean add(GitHubCollaborator object) {
         map.put(object.getEmail(), list.size()-1);
