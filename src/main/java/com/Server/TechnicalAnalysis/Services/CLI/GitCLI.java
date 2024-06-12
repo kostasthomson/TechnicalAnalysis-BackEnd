@@ -1,6 +1,5 @@
 package com.Server.TechnicalAnalysis.Services.CLI;
 
-import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -8,56 +7,36 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 public class GitCLI extends SimpleCLI {
     private final Logger logger = LoggerFactory.getLogger(GitCLI.class);
+    private final String GIT_COMMAND = "git";
 
     public void cloneRepository(String link) {
         // Define the Git clone command
-        String gitCloneCommand = "git clone " + link;
+        String gitCloneCommand = GIT_COMMAND + " clone " + link;
         try {
             // Check if directory exists and/or create directory
             if (!this.repoDir.mkdirs()) throw new ProjectExistsException();
             // Create a ProcessBuilder for the Git clone command
-            int exitCode = this.ExecuteCommandInDirectory(gitCloneCommand, this.REPOSITORIES_DIR);
-            // Check the exit code
-            if (exitCode != 0) throw new CommandExecutionFailedException(exitCode);
-            logger.info("Git clone successful.");
-        } catch (IOException | InterruptedException e) {
-            logger.error("Exception occur while cloning repository");
-        } catch (CommandExecutionFailedException e) {
-            logger.error("Git clone failed with exit code {}", e.getExitCode());
+            this.ExecuteCommand(gitCloneCommand, this.REPOSITORIES_DIR).waitFor();
+            this.logger.info("Git clone successful.");
         } catch (ProjectExistsException e) {
-            logger.warn("Git repository already cloned");
-        }
-    }
-
-    private int runCommand(String command) {
-        try {
-            // Create a ProcessBuilder for the Git log command
-            int exitCode = this.ExecuteCommandInOutput(command);
-            // Check the exit code
-            if (exitCode != 0) throw new CommandExecutionFailedException(exitCode);
-            logger.info("Command completed: {}", command);
-            return 0;
+            this.logger.warn("Git repository already cloned");
         } catch (IOException | InterruptedException e) {
-            logger.error("Unexpected error: {}", command);
-        } catch (CommandExecutionFailedException e) {
-            logger.error("Command execution failed with exit code {}", e.getExitCode());
+            this.logger.error("Exception occur while cloning repository");
         }
-        return -1;
     }
 
-    public File LogCommits() {
-        String gitLogCommits = "git --no-pager log --pretty=format:\"%H, %an, %ae %cn, %ce, %ad, %s\" --name-only";
-        return (this.runCommand(gitLogCommits) == 0) ? this.repoLog : null;
+    public BufferedReader LogCommits() {
+        String gitLogCommits = GIT_COMMAND + " --no-pager log --pretty=format:\"%H, %an, %ae %cn, %ce, %ad, %s\" --name-only";
+        return this.runCommand(gitLogCommits);
     }
 
-    public File LogAuthors() {
+    public BufferedReader LogAuthors() throws IOException {
         // Create repository's log file
         /*
         If no revisions are passed on the command line and either standard input
@@ -65,15 +44,21 @@ public class GitCLI extends SimpleCLI {
         a summary of the log read from standard input, without reference to
         the current repository.
          */
-        try {
-            this.ExecuteCommand("git branch");
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(this.gitProcess.getInputStream()));
-            String mainBranchName = stdInput.readLine().replace("*", "").trim();
-            return (this.runCommand("git shortlog -se --branches " + mainBranchName) == 0) ? this.repoLog : null;
-        } catch (Exception e) {
-            logger.error("Unexpected error: {}", e.getMessage());
+        BufferedReader stdInput = this.runCommand(GIT_COMMAND + " branch");
+        String mainBranchName = Objects.requireNonNull(stdInput).readLine().replace("*", "").trim();
+        return this.runCommand(GIT_COMMAND + " shortlog -se --branches " + mainBranchName);
+    }
+
+    public void keepFiles(List<String> keepFiles) {
+        File[] dirFiles = this.repoDir.listFiles();
+        if (dirFiles == null) return;
+        for (File file : dirFiles) {
+            String name = file.getName();
+            if (!name.endsWith(".java")) continue;
+            if (!keepFiles.contains(name) && file.isFile()) {
+                if (file.delete()) this.logger.info("File deleted: {}", name);
+                else this.logger.warn("File failed: {}", name);
+            }
         }
-        return null;
     }
 }

@@ -1,6 +1,5 @@
 package com.Server.TechnicalAnalysis.Utils.Lists;
 
-import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

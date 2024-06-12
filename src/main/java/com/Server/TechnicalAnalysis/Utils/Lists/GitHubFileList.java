@@ -1,12 +1,9 @@
 package com.Server.TechnicalAnalysis.Utils.Lists;
 
-import com.Server.TechnicalAnalysis.Models.GitHubCommit;
-import com.Server.TechnicalAnalysis.Models.GitHubEntity;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GitHubFileList extends GitHubEntityCollection<GitHubFile> {
 
@@ -31,8 +28,9 @@ public class GitHubFileList extends GitHubEntityCollection<GitHubFile> {
 
     @Override
     public boolean add(GitHubFile object) {
+        this.list.add(object);
         this.map.put(object.getName(), this.list.size()-1);
-        return this.list.add(object);
+        return true;
     }
 
     @Override

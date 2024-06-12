@@ -6,8 +6,6 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Node("Commit")
 public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
@@ -23,7 +21,7 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
     @Relationship(type = "CHANGED_IN", direction = Relationship.Direction.INCOMING)
     private List<GitHubFile> files;
     private List<String> tags;
-
+    public GitHubCommit() {}
     public GitHubCommit(String sha, String message, String date,
                         GitHubCollaborator author, List<GitHubFile> files) {
         this.sha = sha;

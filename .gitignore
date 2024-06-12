@@ -35,3 +35,4 @@ build/
 Repositories/
 /sonar-scanner-4.8.0.2856-windows
 *.properties
+*.log

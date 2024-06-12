@@ -4,38 +4,23 @@ import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 public abstract class SimpleCLI {
+    private final Logger logger = LoggerFactory.getLogger(SimpleCLI.class);
     protected final String REPOSITORIES_PATH_NAME = "Repositories";
     protected final File REPOSITORIES_DIR = new File(REPOSITORIES_PATH_NAME);
-    protected File repoLog = new File(String.format("%s\\log", this.REPOSITORIES_PATH_NAME));
     protected File repoDir;
-    protected Process gitProcess;
 
-    protected int ExecuteCommand(String command) throws IOException, InterruptedException {
-        return this.ExecuteCommand(command, null, null);
+    public Process ExecuteCommand(String command) throws IOException, InterruptedException {
+        return this.ExecuteCommand(command, null);
     }
 
-    protected int ExecuteCommandInDirectory(String command) throws IOException, InterruptedException {
-        return this.ExecuteCommand(command, this.repoDir, null);
-    }
-
-    protected int ExecuteCommandInDirectory(String command, File workingDir) throws IOException, InterruptedException {
-        return this.ExecuteCommand(command, workingDir, null);
-    }
-
-    protected int ExecuteCommandInOutput(String command) throws IOException, InterruptedException {
-        return this.ExecuteCommand(command, null, this.repoLog);
-    }
-
-    protected int ExecuteCommandInOutput(String command, File redirectOutput) throws IOException, InterruptedException {
-        return this.ExecuteCommand(command, null, redirectOutput);
-    }
-
-    protected int ExecuteCommand(String command, File workingDir, File redirectOutput) throws IOException, InterruptedException {
+    protected Process ExecuteCommand(String command, File workingDir) throws IOException {
         ProcessBuilder processBuilder = new ProcessBuilder();
 
         if (TechnicalAnalysisApplication.isWindows()) {
@@ -48,15 +33,20 @@ public abstract class SimpleCLI {
         if (Objects.isNull(workingDir)) processBuilder.directory(this.repoDir);
         else processBuilder.directory(workingDir);
 
-        // Set the output stream where command's results will be displayed
-        if (!Objects.isNull(redirectOutput))
-            processBuilder.redirectOutput(redirectOutput);
-
         // Start the process
-        this.gitProcess = processBuilder.start();
+        return processBuilder.start();
+    }
 
-        // Wait for the process to complete
-        return this.gitProcess.waitFor();
+    public BufferedReader runCommand(String command) {
+        try {
+            // Create a ProcessBuilder for the Git log command
+            Process process = this.ExecuteCommand(command);
+            this.logger.info("Command completed: {}", command);
+            return new BufferedReader(new InputStreamReader(process.getInputStream()));
+        } catch (IOException | InterruptedException e) {
+            this.logger.error("Unexpected error: {}", command);
+        }
+        return null;
     }
 
     public String getDirectory() {
@@ -68,17 +58,6 @@ public abstract class SimpleCLI {
     }
 
     static class ProjectExistsException extends Exception {}
-    static class CommandExecutionFailedException extends Exception {
-        private final int exitCode;
-
-        public CommandExecutionFailedException(int exitCode) {
-            this.exitCode = exitCode;
-        }
-
-        public int getExitCode() {
-            return this.exitCode;
-        }
-    }
     static class EmptyTagListException extends Exception {
         public EmptyTagListException() {
             super("No available tags");

@@ -12,9 +12,7 @@ public class GitHubCollaborator implements GitHubEntity {
     private String email;
     private String name;
 
-    public GitHubCollaborator() {
-        // default, no argument constructor
-    }
+    public GitHubCollaborator() {}
 
     public GitHubCollaborator(String name, String email) {
         this.name = name.replace(" ", "").toLowerCase();

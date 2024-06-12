@@ -1,20 +1,10 @@
 package com.Server.TechnicalAnalysis.Utils.Lists;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
-import com.Server.TechnicalAnalysis.Models.GitHubEntity;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.IntStream;
+import java.util.List;
 
 public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
     public void addAll(List<GitHubCommit> commits) {
@@ -24,8 +14,9 @@ public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
 
     @Override
     public boolean add(GitHubCommit object) {
+        list.add(object);
         map.put(object.getSha(), list.size()-1);
-        return list.add(object);
+        return true;
     }
 
     @Override
@@ -55,29 +46,8 @@ public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
             }
             i--;
         }
-
-//        HashMap<Integer, GitHubCommit> commitMap = new HashMap<>();
-//        HashMap<Integer, LocalDate> weekMap = new HashMap<>();
-//        WeekFields weekFields = WeekFields.of(Locale.getDefault());
-//        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-//            GitHubCommit commit = list.get(entry.getValue());
-//            LocalDate dateObj = LocalDate.parse(commit.getDate(), DateTimeFormatter.ISO_DATE_TIME);
-//            int week = dateObj.get(weekFields.weekOfWeekBasedYear());
-//            LocalDate hashDate = weekMap.putIfAbsent(week, dateObj);
-//            if (hashDate == null) {
-//                commitMap.put(week, commit);
-//                continue;
-//            }
-//            if (hashDate.isBefore(dateObj)) {
-//                weekMap.put(week, dateObj);
-//                commitMap.put(week, commit);
-//            }
-//        }
-//        Map<String, GitHubEntity> validCommits = new HashMap<>();
-//        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-//            GitHubCommit commit = list.get(entry.getValue());
-//            if (commitMap.containsValue(commit)) validCommits.put(entry.getKey(), entry.getValue());
-//        }
-//        list = validCommits;
+         List<GitHubCommit> toRemove = list.subList(i + 1, firstIndex);
+        toRemove.forEach(commit -> map.remove(commit.getSha()));
+        list.removeAll(toRemove);
     }
 }

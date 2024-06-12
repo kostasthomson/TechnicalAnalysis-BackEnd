@@ -5,9 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,15 +14,13 @@ public class GitLogReader {
     private final Logger logger = LoggerFactory.getLogger(GitLogReader.class);
     private final String LOGGER_ERROR_MESSAGE = "GitLogReader: Couldn't read log file {}";
 
-    public List<List<String>> readCommits(File logFile) {
+    public List<List<String>> readCommits(BufferedReader bufferedReader) {
         try {
             List<List<String>> commitsLogList = new ArrayList<>();
-            BufferedReader br = new BufferedReader(new FileReader(logFile));
-
             List<String> commitsStringList = new ArrayList<>();
             String line;
             int countHeads = 0;
-            while ((line=br.readLine()) != null) {
+            while ((line=bufferedReader.readLine()) != null) {
                 if (line.isEmpty()) continue;
                 if (line.contains(",")) {
                     countHeads++;
@@ -37,7 +32,7 @@ public class GitLogReader {
                 }
                 commitsStringList.add(line);
             }
-            br.close();
+            bufferedReader.close();
             return commitsLogList;
         } catch (Exception e) {
             this.logger.error(this.LOGGER_ERROR_MESSAGE, e.getMessage());
@@ -45,28 +40,25 @@ public class GitLogReader {
         return null;
     }
 
-    public List<String[]> readCollaborators(File f) {
+    public List<String[]> readCollaborators(BufferedReader bufferedReader) {
         try {
             List<String[]> authors = new ArrayList<>();
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            while (true) {
-                String line = br.readLine();
-
-                if (line == null) break;
+            String line;
+            while ((line=bufferedReader.readLine()) != null) {
                 List<String> row = new ArrayList<>(
-                        Arrays.stream(line
-                                .trim()
+                    Arrays.stream(
+                            line.trim()
                                 .replace("\t", " ")
                                 .replaceAll("[<>]", "")
-                                .split(" "))
-                        .toList()
+                                .split(" ")
+                    ).toList()
                 );
                 row.remove(0);
                 String email = row.remove(row.size() - 1);
                 String name = String.join(" ", row).toLowerCase();
                 authors.add(new String[] {name, email});
             }
-            br.close();
+            bufferedReader.close();
             return authors;
         } catch (Exception e) {
             this.logger.error(this.LOGGER_ERROR_MESSAGE, e.getMessage());

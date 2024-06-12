@@ -5,8 +5,6 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
-import java.util.List;
-
 @Node("File")
 public class GitHubFile implements GitHubEntity {
     @Id
@@ -18,9 +16,7 @@ public class GitHubFile implements GitHubEntity {
     private Integer loc;
     private Integer td;
 
-    public GitHubFile() {
-        // default, no argument constructor
-    }
+    public GitHubFile() {}
 
     public GitHubFile(String fileName) {
         this.path = fileName;

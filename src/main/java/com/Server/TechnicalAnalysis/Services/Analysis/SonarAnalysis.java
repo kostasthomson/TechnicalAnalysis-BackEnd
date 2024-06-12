@@ -1,6 +1,9 @@
-package com.Server.TechnicalAnalysis.Utils.Analysis;
+package com.Server.TechnicalAnalysis.Services.Analysis;
 
 import com.Server.TechnicalAnalysis.Enums.AnalysisMetrics;
+import com.Server.TechnicalAnalysis.Models.GitHubCommit;
+import com.Server.TechnicalAnalysis.Models.GitHubFile;
+import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
 import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
@@ -11,50 +14,72 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+@Service
 public class SonarAnalysis {
     private final Logger logger = LoggerFactory.getLogger(SonarAnalysis.class);
-    private final String projectOwner;
-    private final String projectName;
-    private final String repoName;
-    private final String sha;
-    private final String sonarQubeUrl;
-    private final String sonarQubeUser;
-    private final String sonarQubePassword;
+    @Autowired
+    private GitCLI gitCLI;
+    private String projectOwner;
+    private String projectName;
+    private String repoName;
+    private String sha;
+    private String sonarQubeUrl;
+    private String sonarQubeUser;
+    private String sonarQubePassword;
     private Integer TD;
     private Integer Complexity;
     private Integer LOC;
+    private String previousSHA;
 
-    public SonarAnalysis(
+    public void setParams (
             String projectOwner,
             String projectName,
-            String sha,
             String url,
             String user,
             String pass
-    ) throws IOException, InterruptedException {
+    )  {
         this.projectOwner = projectOwner;
         this.projectName = projectName;
-        this.sha = sha;
         this.sonarQubeUrl = url;
         this.sonarQubeUser = user;
         this.sonarQubePassword = pass;
-
         String[] repoNameArray = this.projectName.split("\\\\");
         this.repoName = repoNameArray[repoNameArray.length - 1];
+    }
+
+    public void analyze(GitHubCommit commit) throws IOException, InterruptedException {
+        this.sha = commit.getSha();
         //checkout
         checkoutToCommit();
         //create file
         createSonarFile();
+        //remove unchanged files
+//        removeUnchangedFiles();
+//        this.previousSHA = this.sha;
         //start analysis
         makeSonarAnalysis();
-        //Get TD from SonarQube
-        getMetricFromSonarQube();
+        //Get metrics from SonarQube
+        getMetricsFromSonarQube();
+        //Set metrics to commit
+        commit.setComplexity(this.Complexity);
+        commit.setTd(this.TD);
+        commit.setLoc(this.LOC);
+        List<GitHubFile> files = commit.getFiles();
+        for (GitHubFile file : files) {
+            Map<AnalysisMetrics, Integer> metrics = getFileMetricFromSonarQube(file.getPath());
+            file.setComplexity(metrics.get(AnalysisMetrics.COMPLEXITY));
+            file.setTd(metrics.get(AnalysisMetrics.TD));
+            file.setLoc(metrics.get(AnalysisMetrics.LOC));
+        }
     }
 
     private void checkoutToCommit() throws IOException {
@@ -115,6 +140,16 @@ public class SonarAnalysis {
         }
     }
 
+    private void removeUnchangedFiles() {
+        // git diff --name-status sha1 sha2
+        // status   filename
+        if (this.previousSHA == null) return;
+        BufferedReader reader = this.gitCLI.runCommand("git diff --name-status " + this.sha + " "+ this.previousSHA);
+        List<String> files = reader.lines().toList();
+        files = files.stream().map(f->f.substring(1).strip()).toList();
+        this.gitCLI.keepFiles(files);
+    }
+
     //Start Analysis with sonar scanner
     private void makeSonarAnalysis() throws IOException, InterruptedException {
         if (TechnicalAnalysisApplication.isWindows()) {
@@ -160,7 +195,7 @@ public class SonarAnalysis {
         Thread.sleep(500);
     }
 
-    private void getMetricFromSonarQube() {
+    private void getMetricsFromSonarQube() {
         try {
             Unirest.setTimeouts(0, 0);
             HttpResponse<String> response = Unirest
@@ -275,5 +310,4 @@ public class SonarAnalysis {
     public Integer getComplexity() {
         return this.Complexity;
     }
-
 }

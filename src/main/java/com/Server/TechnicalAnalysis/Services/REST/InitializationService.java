@@ -1,21 +1,16 @@
 package com.Server.TechnicalAnalysis.Services.REST;
 
-import com.Server.TechnicalAnalysis.Enums.AnalysisMetrics;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
-import com.Server.TechnicalAnalysis.Models.GitHubEntity;
-import com.Server.TechnicalAnalysis.Models.GitHubFile;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.FileRepository;
 import com.Server.TechnicalAnalysis.Repositories.ProjectRepository;
+import com.Server.TechnicalAnalysis.Services.Analysis.SonarAnalysis;
 import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
 import com.Server.TechnicalAnalysis.Services.CLI.GitHubCLI;
 import com.Server.TechnicalAnalysis.Services.DB.DatabaseController;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreter;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogReader;
-import com.Server.TechnicalAnalysis.Services.Web.GitHubWeb;
-import com.Server.TechnicalAnalysis.Utils.Analysis.SonarAnalysis;
-import com.Server.TechnicalAnalysis.Utils.GitHubCollaboratorBuilder;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -25,10 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class InitializationService {
@@ -53,8 +48,6 @@ public class InitializationService {
     @Autowired
     private DatabaseController dbController;
     @Autowired
-    private GitHubWeb gitHubWeb;
-    @Autowired
     private GitCLI gitCLI;
     @Autowired
     private GitHubCLI gitHubCLI;
@@ -62,6 +55,11 @@ public class InitializationService {
     private GitLogReader gitLogReader;
     @Autowired
     private GitLogInterpreter gitLogInterpreter;
+    @Autowired
+    private SonarAnalysis sonarAnalysis;
+
+    private int COMMITS_COUNT;
+    private String PROJECT_ID;
 
     private void addRepositories() {
         this.dbController.setProjectRepository(projectRepository);
@@ -72,35 +70,26 @@ public class InitializationService {
     }
 
     private void analyzeCommits(GitHubCommitList commits, String repositoryName, String repositoryOwner) {
+        sonarAnalysis.setParams(
+                repositoryOwner,
+                String.format("%s\\%s", this.gitCLI.getDirectory(), repositoryName),
+                sonarQubeUrl,
+                sonarQubeUsername,
+                sonarQubePassword
+        );
         for (GitHubCommit commit : commits) {
             this.gitHubCLI.addPullRequestTags(commit);
             try {
-                SonarAnalysis sonarAnalysis = new SonarAnalysis(
-                        repositoryOwner,
-                        String.format("%s\\%s", this.gitCLI.getDirectory(), repositoryName),
-                        commit.getSha(),
-                        sonarQubeUrl,
-                        sonarQubeUsername,
-                        sonarQubePassword
-                );
-                commit.setComplexity(sonarAnalysis.getComplexity());
-                commit.setTd(sonarAnalysis.getTD());
-                commit.setLoc(sonarAnalysis.getLOC());
-                List<GitHubFile> files = commit.getFiles();
-                for (GitHubFile file : files) {
-                    try {
-                        Map<AnalysisMetrics, Integer> metrics = sonarAnalysis.getFileMetricFromSonarQube(file.getPath());
-                        file.setComplexity(metrics.get(AnalysisMetrics.COMPLEXITY));
-                        file.setTd(metrics.get(AnalysisMetrics.TD));
-                        file.setLoc(metrics.get(AnalysisMetrics.LOC));
-                    } catch (NullPointerException e) {
-                        this.logger.error("startInitialization: {}", e.getMessage());
-                    }
-                }
+                sonarAnalysis.analyze(commit);
             } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
+                this.logger.error("An unexpected exception occurred");
             }
         }
+        int succeed = this.gitHubCLI.getSucceed();
+        if (succeed != 0) this.logger.warn("Pull request tags: Succeed {}", succeed);
+        int failed = this.gitHubCLI.getFailed();
+        if (failed != 0) this.logger.warn("Pull request tags: Failed {}", failed);
+        this.logger.info("Analyzed commits: {}", commits.size());
     }
 
     private void deleteRepositoryDirectory() {
@@ -114,6 +103,12 @@ public class InitializationService {
             }
         }
     }
+
+    private void resetApplication() {
+        this.deleteRepositoryDirectory();
+        this.gitLogInterpreter.reset();
+    }
+
     // todo: fix error handling
     // todo: fix analysis on existing projects
     public void startInitialization(String link) {
@@ -122,6 +117,7 @@ public class InitializationService {
 
         // Get repo link information
         String[] splitLink = link.split("/");
+        if (splitLink.length <= 1) return;
         String repositoryName = splitLink[splitLink.length - 1];
         String repositoryOwner = splitLink[splitLink.length - 2];
 
@@ -129,15 +125,25 @@ public class InitializationService {
         this.gitCLI.cloneRepository(link);
 
         // Request collaborators
-        File f = this.gitCLI.LogAuthors();
-        List<String[]> logAuthors = this.gitLogReader.readCollaborators(f);
-        GitHubCollaboratorList collaborators = this.gitLogInterpreter.createCollaboratorList(logAuthors);
+        GitHubCollaboratorList collaborators;
+        try (BufferedReader bufferedReader = this.gitCLI.LogAuthors()) {
+            List<String[]> logAuthors = this.gitLogReader.readCollaborators(bufferedReader);
+            collaborators = this.gitLogInterpreter.createCollaboratorList(logAuthors);
+        } catch (IOException e) {
+            logger.error("IOException Authors error: {}", e.getMessage());
+            return;
+        }
 
         // Request commits
-        File commitsLogFile = this.gitCLI.LogCommits();
-        List<List<String>> commitsLogList = this.gitLogReader.readCommits(commitsLogFile);
-        GitHubCommitList commits = this.gitLogInterpreter.createCommitsList(commitsLogList);
-        commits.filterPerWeek();
+        GitHubCommitList commits;
+        try (BufferedReader bufferedReader = this.gitCLI.LogCommits()) {
+            List<List<String>> commitsLogList = this.gitLogReader.readCommits(bufferedReader);
+            commits = this.gitLogInterpreter.createCommitsList(commitsLogList);
+            commits.filterPerWeek();
+            } catch (IOException e) {
+            logger.error("IOException Commits error: {}", e.getMessage());
+            return;
+        }
 
         this.analyzeCommits(commits, repositoryName, repositoryOwner);
 
@@ -146,7 +152,18 @@ public class InitializationService {
         this.dbController.createProjectNode(repositoryName, commits.getLatest());
         this.dbController.writeCommits(commits);
 
+        PROJECT_ID = repositoryOwner + "/" + repositoryName;
+        COMMITS_COUNT = commits.size();
+
         // Delete cloned repository directory
-        this.deleteRepositoryDirectory();
+        this.resetApplication();
+    }
+
+    public int getCOMMITS_COUNT() {
+        return this.COMMITS_COUNT;
+    }
+
+    public String getPROJECT_ID() {
+        return this.PROJECT_ID;
     }
 }

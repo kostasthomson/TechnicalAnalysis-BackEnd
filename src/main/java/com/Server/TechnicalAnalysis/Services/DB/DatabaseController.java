@@ -17,9 +17,9 @@ import java.util.List;
 @Service
 public class DatabaseController {
     @Autowired
-    private DatabaseWriter dbWriter; //= new DatabaseWriter();
+    private DatabaseWriter dbWriter;
     @Autowired
-    private DatabaseReader dbReader; // = new DatabaseReader();
+    private DatabaseReader dbReader;
 
     private ProjectRepository projectRepository;
     private CollaboratorRepository collaboratorRepository;
