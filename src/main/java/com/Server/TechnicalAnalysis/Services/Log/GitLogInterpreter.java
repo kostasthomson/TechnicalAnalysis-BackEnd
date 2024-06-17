@@ -41,26 +41,20 @@ public class GitLogInterpreter {
         ).format(DateTimeFormatter.ISO_DATE_TIME);
         String message = commitInfo.get(5);
         String authorKey = commitInfo.get(2).trim().split(" ")[0];
-        GitHubCollaborator collaborator = null;
-        try {
-            collaborator = collaboratorList.get(authorKey);
-        } catch (Exception e) {
-            collaborator = collaboratorList.get(authorKey);
-        }
+        GitHubCollaborator collaborator = collaboratorList.get(authorKey);
         if (collaborator == null) this.logger.warn("No author found: Commit [{}]", sha);
         return new GitHubCommit(sha, message, date, collaborator, files);
     }
 
     public GitHubCommitList createCommitsList(List<List<String>> logCommits) {
         try {
-            commitList.addAll(
+            return commitList.addAll(
                     logCommits.stream()
                             .map(this::createCommit)
                             .filter(Objects::nonNull)
                             .sorted()
                             .toList()
             );
-            return commitList;
         } catch (NullPointerException npe) {
             logger.error("Cannot interpret logged commits: {}", npe.getMessage());
         }

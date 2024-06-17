@@ -5,6 +5,8 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+import java.util.Random;
+
 @Node("File")
 public class GitHubFile implements GitHubEntity {
     @Id
@@ -15,8 +17,13 @@ public class GitHubFile implements GitHubEntity {
     private Integer complexity;
     private Integer loc;
     private Integer td;
+    private Integer numFiles;
+    private Integer functions;
+    private Integer commentLines;
+    private Integer codeSmells;
 
-    public GitHubFile() {}
+    public GitHubFile() {
+    }
 
     public GitHubFile(String fileName) {
         this.path = fileName;
@@ -33,6 +40,38 @@ public class GitHubFile implements GitHubEntity {
 
     public boolean isJava() {
         return this.name.endsWith(".java");
+    }
+
+    public Integer getNumFiles() {
+        return numFiles;
+    }
+
+    public void setNumFiles(Integer num_files) {
+        this.numFiles = num_files;
+    }
+
+    public Integer getFunctions() {
+        return functions;
+    }
+
+    public void setFunctions(Integer functions) {
+        this.functions = functions;
+    }
+
+    public Integer getCommentLines() {
+        return commentLines;
+    }
+
+    public void setCommentLines(Integer comment_lines) {
+        this.commentLines = comment_lines;
+    }
+
+    public Integer getCodeSmells() {
+        return codeSmells;
+    }
+
+    public void setCodeSmells(Integer code_smells) {
+        this.codeSmells = code_smells;
     }
 
     public String getName() {

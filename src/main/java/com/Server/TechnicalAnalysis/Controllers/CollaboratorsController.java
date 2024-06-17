@@ -3,29 +3,27 @@ package com.Server.TechnicalAnalysis.Controllers;
 import com.Server.TechnicalAnalysis.Models.GitHubCollaborator;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/collaborators")
-@CrossOrigin(origins = "http://localhost:3000") //enable cors
 public class CollaboratorsController {
 
-    private final CollaboratorRepository repository;
-
     @Autowired
-    public CollaboratorsController(CollaboratorRepository repository) {
-        this.repository = repository;
-    }
+    private CollaboratorRepository repository;
 
     @GetMapping
-    public List<GitHubCollaborator> GetAllCommits() {
-        return (List<GitHubCollaborator>) this.repository.findAll();
+    public List<GitHubCollaborator> getAllCollaborators() {
+        return this.repository.findAll();
     }
 
-    @GetMapping("/{id}")
-    public GitHubCollaborator GetCommit(@PathVariable String id) {
-        return this.repository.findByName(id);
+    @GetMapping("/{email}")
+    public GitHubCollaborator getCollaborator(@PathVariable String email) {
+        return this.repository.findByEmail(email);
     }
 }

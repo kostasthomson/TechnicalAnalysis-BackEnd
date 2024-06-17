@@ -9,8 +9,8 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.util.List;
 
-@Node("Repository")
-public class GitHubRepository {
+@Node("Project")
+public class GitHubProject {
     @Id
     @GeneratedValue(UUIDStringGenerator.class)
     private String node_id;
@@ -22,16 +22,58 @@ public class GitHubRepository {
     private Integer complexity;
     private Integer loc;
     private Integer td;
+    private Integer numFiles;
+    private Integer functions;
+    private Integer commentLines;
+    private Integer codeSmells;
+    private int maxTd;
 
-    public GitHubRepository() {
+    public GitHubProject() {
     }
 
-    public GitHubRepository(String name, List<GitHubCollaborator> collaborators, Integer complexity, Integer loc, Integer td) {
+    public GitHubProject(String name, List<GitHubCollaborator> collaborators, GitHubCommit commit, int maxTd) {
         this.name = name;
         this.collaborators = collaborators;
-        this.complexity = complexity;
-        this.loc = loc;
-        this.td = td;
+        this.complexity = commit.getComplexity();
+        this.loc = commit.getLoc();
+        this.td = commit.getTd();
+        this.numFiles = commit.getNumFiles();
+        this.functions = commit.getFunctions();
+        this.commentLines = commit.getCommentLines();
+        this.codeSmells = commit.getCodeSmells();
+        this.maxTd = maxTd;
+    }
+
+    public Integer getNumFiles() {
+        return numFiles;
+    }
+
+    public void setNumFiles(Integer numFiles) {
+        this.numFiles = numFiles;
+    }
+
+    public Integer getCommentLines() {
+        return commentLines;
+    }
+
+    public void setCommentLines(Integer commentLines) {
+        this.commentLines = commentLines;
+    }
+
+    public Integer getCodeSmells() {
+        return codeSmells;
+    }
+
+    public void setCodeSmells(Integer codeSmells) {
+        this.codeSmells = codeSmells;
+    }
+
+    public int getMaxTd() {
+        return maxTd;
+    }
+
+    public void setMaxTd(int maxTd) {
+        this.maxTd = maxTd;
     }
 
     public String getNode_id() {
@@ -40,6 +82,14 @@ public class GitHubRepository {
 
     public void setNode_id(String node_id) {
         this.node_id = node_id;
+    }
+
+    public Integer getFunctions() {
+        return functions;
+    }
+
+    public void setFunctions(Integer functions) {
+        this.functions = functions;
     }
 
     public List<GitHubCollaborator> getCollaborators() {

@@ -16,12 +16,20 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
     private Integer complexity;
     private Integer loc;
     private Integer td;
+    private Integer numFiles;
+    private Integer functions;
+    private Integer commentLines;
+    private Integer codeSmells;
     @Relationship(type = "COMMITTED_BY", direction = Relationship.Direction.OUTGOING)
     private GitHubCollaborator author;
     @Relationship(type = "CHANGED_IN", direction = Relationship.Direction.INCOMING)
     private List<GitHubFile> files;
     private List<String> tags;
-    public GitHubCommit() {}
+    private String projectName;
+
+    public GitHubCommit() {
+    }
+
     public GitHubCommit(String sha, String message, String date,
                         GitHubCollaborator author, List<GitHubFile> files) {
         this.sha = sha;
@@ -56,6 +64,46 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
     @Override
     public String toString() {
         return "Commit:\n\t\tsha:" + this.sha + "\n\t\tdate:" + this.date + "\n\t\tfiles:" + this.files;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public Integer getNumFiles() {
+        return numFiles;
+    }
+
+    public void setNumFiles(Integer num_files) {
+        this.numFiles = num_files;
+    }
+
+    public Integer getFunctions() {
+        return functions;
+    }
+
+    public void setFunctions(Integer functions) {
+        this.functions = functions;
+    }
+
+    public Integer getCommentLines() {
+        return commentLines;
+    }
+
+    public void setCommentLines(Integer comment_lines) {
+        this.commentLines = comment_lines;
+    }
+
+    public Integer getCodeSmells() {
+        return codeSmells;
+    }
+
+    public void setCodeSmells(Integer code_smells) {
+        this.codeSmells = code_smells;
     }
 
     public GitHubCollaborator getAuthor() {

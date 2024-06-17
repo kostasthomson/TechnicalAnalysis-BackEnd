@@ -1,6 +1,7 @@
 package com.Server.TechnicalAnalysis.Services.REST;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
+import com.Server.TechnicalAnalysis.Models.GitHubFile;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.FileRepository;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -66,7 +68,6 @@ public class InitializationService {
         this.dbController.setCollaboratorRepository(collaboratorRepository);
         this.dbController.setCommitRepository(commitRepository);
         this.dbController.setFileRepository(fileRepository);
-        this.dbController.eraseAll();
     }
 
     private void analyzeCommits(GitHubCommitList commits, String repositoryName, String repositoryOwner) {
@@ -81,6 +82,7 @@ public class InitializationService {
             this.gitHubCLI.addPullRequestTags(commit);
             try {
                 sonarAnalysis.analyze(commit);
+                commit.setProjectName(PROJECT_ID);
             } catch (IOException | InterruptedException e) {
                 this.logger.error("An unexpected exception occurred");
             }
@@ -120,6 +122,7 @@ public class InitializationService {
         if (splitLink.length <= 1) return;
         String repositoryName = splitLink[splitLink.length - 1];
         String repositoryOwner = splitLink[splitLink.length - 2];
+        PROJECT_ID = repositoryOwner + "/" + repositoryName;
 
         this.gitCLI.setWorkingRepository(repositoryName);
         this.gitCLI.cloneRepository(link);
@@ -140,7 +143,7 @@ public class InitializationService {
             List<List<String>> commitsLogList = this.gitLogReader.readCommits(bufferedReader);
             commits = this.gitLogInterpreter.createCommitsList(commitsLogList);
             commits.filterPerWeek();
-            } catch (IOException e) {
+        } catch (IOException e) {
             logger.error("IOException Commits error: {}", e.getMessage());
             return;
         }
@@ -149,12 +152,40 @@ public class InitializationService {
 
         // Save entities
         this.dbController.writeCollaborators(collaborators);
-        this.dbController.createProjectNode(repositoryName, commits.getLatest());
+        this.dbController.createProjectNode(PROJECT_ID, commits.getLatest(), commits.findMaxFileTd());
         this.dbController.writeCommits(commits);
 
-        PROJECT_ID = repositoryOwner + "/" + repositoryName;
         COMMITS_COUNT = commits.size();
 
+        try {
+            File analysisFile = new File("./src/main/resources/static/" + repositoryOwner + "_" + repositoryName + ".csv");
+            FileWriter writer = new FileWriter(analysisFile, true);
+            // header: project_name; file; package (relative path); sha; tag; contributor; sqale_index; ncloc; code_smells; files; functions; comment_lines; td->td_min
+            if (analysisFile.length() == 0)
+                writer.append("PROJECT_NAME;FILE;PACKAGE;SHA;TAGS;CONTRIBUTOR;TD;COMPLEXITY;LOC;CODE_SMELLS;FILES;FUNCTIONS;COMMENT_LINES").append("\n");
+            for (GitHubCommit commit : commits) {
+                List<GitHubFile> files = commit.getFiles();
+                for (GitHubFile file : files)
+                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;",
+                            PROJECT_ID,
+                            file.getName(),
+                            file.getPath(),
+                            commit.getSha(),
+                            String.join(", ", commit.getTags()),
+                            commit.getAuthor().getEmail(),
+                            file.getTd(),
+                            file.getComplexity(),
+                            file.getLoc(),
+                            file.getCodeSmells(),
+                            file.getNumFiles(),
+                            file.getFunctions(),
+                            file.getCommentLines()
+                    )).append("\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         // Delete cloned repository directory
         this.resetApplication();
     }

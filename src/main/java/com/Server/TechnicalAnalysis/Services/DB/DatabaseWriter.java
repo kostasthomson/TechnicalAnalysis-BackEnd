@@ -2,7 +2,7 @@ package com.Server.TechnicalAnalysis.Services.DB;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCollaborator;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
-import com.Server.TechnicalAnalysis.Models.GitHubRepository;
+import com.Server.TechnicalAnalysis.Models.GitHubProject;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.ProjectRepository;
@@ -22,7 +22,7 @@ public class DatabaseWriter {
             repo.save(commit);
     }
 
-    public void saveRepository(ProjectRepository repo, GitHubRepository gitHubRepository) {
-        repo.save(gitHubRepository);
+    public void saveRepository(ProjectRepository repo, GitHubProject gitHubProject) {
+        repo.save(gitHubProject);
     }
 }

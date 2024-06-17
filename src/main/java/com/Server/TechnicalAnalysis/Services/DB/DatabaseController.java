@@ -2,7 +2,7 @@ package com.Server.TechnicalAnalysis.Services.DB;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCollaborator;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
-import com.Server.TechnicalAnalysis.Models.GitHubRepository;
+import com.Server.TechnicalAnalysis.Models.GitHubProject;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.FileRepository;
@@ -42,9 +42,9 @@ public class DatabaseController {
         this.fileRepository = repo;
     }
 
-    public void createProjectNode(String repoName, GitHubCommit latestCommit) {
+    public void createProjectNode(String projectName, GitHubCommit latestCommit, int maxTd) {
         List<GitHubCollaborator> collaboratorList = this.dbReader.getCollaborators(this.collaboratorRepository);
-        this.dbWriter.saveRepository(this.projectRepository, new GitHubRepository(repoName, collaboratorList, latestCommit.getComplexity(), latestCommit.getLoc(), latestCommit.getTd()));
+        this.dbWriter.saveRepository(this.projectRepository, new GitHubProject(projectName, collaboratorList, latestCommit, maxTd));
     }
 
     public void writeCommits(GitHubCommitList list) {

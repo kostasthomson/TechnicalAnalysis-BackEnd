@@ -1,7 +1,7 @@
 package com.Server.TechnicalAnalysis.Services.DB;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCollaborator;
-import com.Server.TechnicalAnalysis.Models.GitHubRepository;
+import com.Server.TechnicalAnalysis.Models.GitHubProject;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.ProjectRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class DatabaseReader {
         return repository.findAll();
     }
 
-    public GitHubRepository getProjectRepository(ProjectRepository repository, String name) {
+    public GitHubProject getProjectRepository(ProjectRepository repository, String name) {
         return repository.findByName(name);
     }
 }

@@ -38,15 +38,18 @@ public class SonarAnalysis {
     private Integer TD;
     private Integer Complexity;
     private Integer LOC;
-    private String previousSHA;
+    private Integer FILES;
+    private Integer FUNCTIONS;
+    private Integer COMMENT_LINES;
+    private Integer CODE_SMELLS;
 
-    public void setParams (
+    public void setParams(
             String projectOwner,
             String projectName,
             String url,
             String user,
             String pass
-    )  {
+    ) {
         this.projectOwner = projectOwner;
         this.projectName = projectName;
         this.sonarQubeUrl = url;
@@ -62,9 +65,6 @@ public class SonarAnalysis {
         checkoutToCommit();
         //create file
         createSonarFile();
-        //remove unchanged files
-//        removeUnchangedFiles();
-//        this.previousSHA = this.sha;
         //start analysis
         makeSonarAnalysis();
         //Get metrics from SonarQube
@@ -73,12 +73,20 @@ public class SonarAnalysis {
         commit.setComplexity(this.Complexity);
         commit.setTd(this.TD);
         commit.setLoc(this.LOC);
+        commit.setNumFiles(this.FILES);
+        commit.setFunctions(this.FUNCTIONS);
+        commit.setCommentLines(this.COMMENT_LINES);
+        commit.setCodeSmells(this.CODE_SMELLS);
         List<GitHubFile> files = commit.getFiles();
         for (GitHubFile file : files) {
             Map<AnalysisMetrics, Integer> metrics = getFileMetricFromSonarQube(file.getPath());
             file.setComplexity(metrics.get(AnalysisMetrics.COMPLEXITY));
             file.setTd(metrics.get(AnalysisMetrics.TD));
             file.setLoc(metrics.get(AnalysisMetrics.LOC));
+            file.setNumFiles(metrics.get(AnalysisMetrics.FILES));
+            file.setFunctions(metrics.get(AnalysisMetrics.FUNCTIONS));
+            file.setCommentLines(metrics.get(AnalysisMetrics.COMMENT_LINES));
+            file.setCodeSmells(metrics.get(AnalysisMetrics.CODE_SMELLS));
         }
     }
 
@@ -140,16 +148,6 @@ public class SonarAnalysis {
         }
     }
 
-    private void removeUnchangedFiles() {
-        // git diff --name-status sha1 sha2
-        // status   filename
-        if (this.previousSHA == null) return;
-        BufferedReader reader = this.gitCLI.runCommand("git diff --name-status " + this.sha + " "+ this.previousSHA);
-        List<String> files = reader.lines().toList();
-        files = files.stream().map(f->f.substring(1).strip()).toList();
-        this.gitCLI.keepFiles(files);
-    }
-
     //Start Analysis with sonar scanner
     private void makeSonarAnalysis() throws IOException, InterruptedException {
         if (TechnicalAnalysisApplication.isWindows()) {
@@ -199,7 +197,7 @@ public class SonarAnalysis {
         try {
             Unirest.setTimeouts(0, 0);
             HttpResponse<String> response = Unirest
-                    .get(String.format("%s/api/measures/component?component=%s:%s&metricKeys=sqale_index,complexity,ncloc",
+                    .get(String.format("%s/api/measures/component?component=%s:%s&metricKeys=sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines",
                             this.sonarQubeUrl, this.projectOwner, this.repoName))
                     .basicAuth(this.sonarQubeUser, this.sonarQubePassword)
                     .asString();
@@ -216,6 +214,14 @@ public class SonarAnalysis {
                         this.Complexity = Integer.parseInt(jsonobj_1.get("value").toString());
                     if (jsonobj_1.get("metric").toString().equals("ncloc"))
                         this.LOC = Integer.parseInt(jsonobj_1.get("value").toString());
+                    if (jsonobj_1.get("metric").toString().equals("files"))
+                        this.FILES = Integer.parseInt(jsonobj_1.get("value").toString());
+                    if (jsonobj_1.get("metric").toString().equals("functions"))
+                        this.FUNCTIONS = Integer.parseInt(jsonobj_1.get("value").toString());
+                    if (jsonobj_1.get("metric").toString().equals("comment_lines"))
+                        this.COMMENT_LINES = Integer.parseInt(jsonobj_1.get("value").toString());
+                    if (jsonobj_1.get("metric").toString().equals("code_smells"))
+                        this.CODE_SMELLS = Integer.parseInt(jsonobj_1.get("value").toString());
                 }
             }
         } catch (ParseException | UnirestException e) {
@@ -228,7 +234,7 @@ public class SonarAnalysis {
             Map<AnalysisMetrics, Integer> metrics = new HashMap<>();
             Unirest.setTimeouts(0, 0);
             HttpResponse<String> response = Unirest
-                    .get(String.format("%s/api/measures/component?component=%s:%s:%s&metricKeys=sqale_index,complexity,ncloc",
+                    .get(String.format("%s/api/measures/component?component=%s:%s:%s&metricKeys=sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines",
                             this.sonarQubeUrl, this.projectOwner, this.repoName, filePath))
                     .basicAuth(sonarQubeUser, sonarQubePassword)
                     .asString();
@@ -245,6 +251,14 @@ public class SonarAnalysis {
                         metrics.put(AnalysisMetrics.COMPLEXITY, Integer.parseInt(jsonobj_1.get("value").toString()));
                     if (jsonobj_1.get("metric").toString().equals("ncloc"))
                         metrics.put(AnalysisMetrics.LOC, Integer.parseInt(jsonobj_1.get("value").toString()));
+                    if (jsonobj_1.get("metric").toString().equals("files"))
+                        metrics.put(AnalysisMetrics.FILES, Integer.parseInt(jsonobj_1.get("value").toString()));
+                    if (jsonobj_1.get("metric").toString().equals("functions"))
+                        metrics.put(AnalysisMetrics.FUNCTIONS, Integer.parseInt(jsonobj_1.get("value").toString()));
+                    if (jsonobj_1.get("metric").toString().equals("comment_lines"))
+                        metrics.put(AnalysisMetrics.COMMENT_LINES, Integer.parseInt(jsonobj_1.get("value").toString()));
+                    if (jsonobj_1.get("metric").toString().equals("code_smells"))
+                        metrics.put(AnalysisMetrics.CODE_SMELLS, Integer.parseInt(jsonobj_1.get("value").toString()));
                 }
             }
             return metrics;
@@ -309,5 +323,45 @@ public class SonarAnalysis {
 
     public Integer getComplexity() {
         return this.Complexity;
+    }
+
+    public Integer getFILES() {
+        return FILES;
+    }
+
+    public Integer getFUNCTIONS() {
+        return FUNCTIONS;
+    }
+
+    public Integer getCOMMENT_LINES() {
+        return COMMENT_LINES;
+    }
+
+    public Integer getCODE_SMELLS() {
+        return CODE_SMELLS;
+    }
+
+    public String getSonarQubeUrl() {
+        return sonarQubeUrl;
+    }
+
+    public String getSonarQubeUser() {
+        return sonarQubeUser;
+    }
+
+    public String getSonarQubePassword() {
+        return sonarQubePassword;
+    }
+
+    public String getProjectOwner() {
+        return projectOwner;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getRepoName() {
+        return repoName;
     }
 }

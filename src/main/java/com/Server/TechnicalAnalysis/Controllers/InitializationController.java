@@ -4,7 +4,10 @@ import com.Server.TechnicalAnalysis.Services.REST.InitializationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,7 +18,6 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/init")
-@CrossOrigin(origins = "http://localhost:3000") //enable cors
 public class InitializationController {
     private final Logger logger = LoggerFactory.getLogger(InitializationController.class);
     @Autowired
@@ -34,9 +36,11 @@ public class InitializationController {
         this.logger.info("Execution time -> {}:{}:{}", hours, minutes, seconds);
         this.logger.info("Set up complete {}", link);
         try {
-            File file = new File("./RESULTS_LOG.log");
-            FileWriter writer = new FileWriter(file, true);
+            File logFile = new File("./RESULTS_LOG.log");
+            FileWriter writer = new FileWriter(logFile, true);
             // header: timestamp, projectId, commits, timeElapsed
+            if (logFile.length() == 0)
+                writer.append("TIMESTAMP, PROJECT, COMMITS, INIT_TIME").append("\n");
             writer.append(String.format("%s,%s,%s,%s:%s:%s",
                     new Timestamp(System.currentTimeMillis()),
                     this.initializationService.getPROJECT_ID(),
