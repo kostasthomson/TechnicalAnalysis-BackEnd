@@ -1,6 +1,6 @@
 package com.Server.TechnicalAnalysis.Controllers;
 
-import com.Server.TechnicalAnalysis.Services.REST.InitializationService;
+import com.Server.TechnicalAnalysis.Services.Controller.InitializationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

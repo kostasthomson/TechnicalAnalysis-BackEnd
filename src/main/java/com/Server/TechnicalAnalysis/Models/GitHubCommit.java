@@ -6,32 +6,28 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Node("Commit")
-public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
+public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Comparable<GitHubCommit> {
     @Id
     private String sha;
     private String date;
     private String message;
-    private Integer complexity;
-    private Integer loc;
-    private Integer td;
-    private Integer numFiles;
-    private Integer functions;
-    private Integer commentLines;
-    private Integer codeSmells;
     @Relationship(type = "COMMITTED_BY", direction = Relationship.Direction.OUTGOING)
     private GitHubCollaborator author;
     @Relationship(type = "CHANGED_IN", direction = Relationship.Direction.INCOMING)
     private List<GitHubFile> files;
     private List<String> tags;
     private String projectName;
+    private boolean isWeekCommit = false;
 
     public GitHubCommit() {
     }
 
-    public GitHubCommit(String sha, String message, String date,
+    public GitHubCommit(String projectId, String sha, String message, String date,
                         GitHubCollaborator author, List<GitHubFile> files) {
+        this.projectName = projectId;
         this.sha = sha;
         this.message = message;
         this.date = date;
@@ -39,8 +35,9 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
         this.files = files;
     }
 
-    public GitHubCommit(String sha, String message, String date,
+    public GitHubCommit(String projectId, String sha, String message, String date,
                         GitHubCollaborator author, List<GitHubFile> files, List<String> tags) {
+        this.projectName = projectId;
         this.sha = sha;
         this.message = message;
         this.date = date;
@@ -51,7 +48,7 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
 
     @Override
     public boolean equals(Object obj) {
-        return this.sha.equals(((GitHubCommit) obj).getSha());
+        return this.sha.equals(((GitHubCommit) obj).sha);
     }
 
     @Override
@@ -72,38 +69,6 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public Integer getNumFiles() {
-        return numFiles;
-    }
-
-    public void setNumFiles(Integer num_files) {
-        this.numFiles = num_files;
-    }
-
-    public Integer getFunctions() {
-        return functions;
-    }
-
-    public void setFunctions(Integer functions) {
-        this.functions = functions;
-    }
-
-    public Integer getCommentLines() {
-        return commentLines;
-    }
-
-    public void setCommentLines(Integer comment_lines) {
-        this.commentLines = comment_lines;
-    }
-
-    public Integer getCodeSmells() {
-        return codeSmells;
-    }
-
-    public void setCodeSmells(Integer code_smells) {
-        this.codeSmells = code_smells;
     }
 
     public GitHubCollaborator getAuthor() {
@@ -154,27 +119,11 @@ public class GitHubCommit implements GitHubEntity, Comparable<GitHubCommit> {
         this.tags = tags;
     }
 
-    public Integer getComplexity() {
-        return complexity;
+    public void setIsWeekCommit() {
+        this.isWeekCommit = true;
     }
 
-    public void setComplexity(Integer complexity) {
-        this.complexity = complexity;
-    }
-
-    public Integer getLoc() {
-        return loc;
-    }
-
-    public void setLoc(Integer loc) {
-        this.loc = loc;
-    }
-
-    public Integer getTd() {
-        return td;
-    }
-
-    public void setTd(Integer td) {
-        this.td = td;
+    public boolean isWeekCommit() {
+        return this.isWeekCommit;
     }
 }

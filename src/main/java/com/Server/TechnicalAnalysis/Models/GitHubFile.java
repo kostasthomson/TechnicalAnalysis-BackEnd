@@ -5,22 +5,17 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 @Node("File")
-public class GitHubFile implements GitHubEntity {
+public class GitHubFile extends GitHubMetricEntity implements GitHubEntity {
     @Id
     @GeneratedValue(UUIDStringGenerator.class)
     private String node_id;
     private String name;
     private String path;
-    private Integer complexity;
-    private Integer loc;
-    private Integer td;
-    private Integer numFiles;
-    private Integer functions;
-    private Integer commentLines;
-    private Integer codeSmells;
 
     public GitHubFile() {
     }
@@ -42,38 +37,6 @@ public class GitHubFile implements GitHubEntity {
         return this.name.endsWith(".java");
     }
 
-    public Integer getNumFiles() {
-        return numFiles;
-    }
-
-    public void setNumFiles(Integer num_files) {
-        this.numFiles = num_files;
-    }
-
-    public Integer getFunctions() {
-        return functions;
-    }
-
-    public void setFunctions(Integer functions) {
-        this.functions = functions;
-    }
-
-    public Integer getCommentLines() {
-        return commentLines;
-    }
-
-    public void setCommentLines(Integer comment_lines) {
-        this.commentLines = comment_lines;
-    }
-
-    public Integer getCodeSmells() {
-        return codeSmells;
-    }
-
-    public void setCodeSmells(Integer code_smells) {
-        this.codeSmells = code_smells;
-    }
-
     public String getName() {
         return this.name;
     }
@@ -90,30 +53,6 @@ public class GitHubFile implements GitHubEntity {
         this.node_id = node_id;
     }
 
-    public Integer getComplexity() {
-        return complexity;
-    }
-
-    public void setComplexity(Integer complexity) {
-        this.complexity = complexity;
-    }
-
-    public Integer getLoc() {
-        return loc;
-    }
-
-    public void setLoc(Integer loc) {
-        this.loc = loc;
-    }
-
-    public Integer getTd() {
-        return td;
-    }
-
-    public void setTd(Integer td) {
-        this.td = td;
-    }
-
     public String getPath() {
         return path;
     }
@@ -125,5 +64,10 @@ public class GitHubFile implements GitHubEntity {
     @Override
     public String toString() {
         return this.name;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return this.path.equals(((GitHubFile) object).path);
     }
 }

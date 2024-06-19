@@ -21,7 +21,7 @@ public class AnalysisFilesController {
 
     @GetMapping
     public ResponseEntity<InputStreamResource> exportFile(@RequestParam(value = "fileName") String fileName) throws Exception {
-        File file = new File(".\\src\\main\\resources\\static\\" + fileName + ".csv");
+        File file = new File(fileName + ".csv");
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + file.getName())

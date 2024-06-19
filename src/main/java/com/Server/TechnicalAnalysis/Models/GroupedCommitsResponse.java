@@ -1,5 +1,7 @@
 package com.Server.TechnicalAnalysis.Models;
 
+import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
+
 import java.util.List;
 
 public class GroupedCommitsResponse {
@@ -7,10 +9,10 @@ public class GroupedCommitsResponse {
     private int maxTd;
     private List<GitHubCommit> value;
 
-    public GroupedCommitsResponse(String key, int maxTd,  List<GitHubCommit> value) {
+    public GroupedCommitsResponse(String key,  GitHubCommitList commits) {
         this.key = key;
-        this.maxTd = maxTd;
-        this.value = value;
+        this.maxTd = commits.findMaxFileTd();
+        this.value = commits.stream().toList();
     }
 
     public String getKey() {

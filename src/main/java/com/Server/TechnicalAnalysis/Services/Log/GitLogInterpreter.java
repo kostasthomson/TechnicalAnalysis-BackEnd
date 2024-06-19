@@ -24,7 +24,7 @@ public class GitLogInterpreter {
     private final GitHubCommitList commitList = new GitHubCommitList();
     private final GitHubCollaboratorList collaboratorList = new GitHubCollaboratorList();
 
-    private GitHubCommit createCommit(List<String> commitsList) {
+    private GitHubCommit createCommit(List<String> commitsList, String projectId) {
         List<String> commitFiles = commitsList.subList(1, commitsList.size());
         List<GitHubFile> files = GitHubFileList.parseToList(commitFiles);
         if (files.isEmpty()) return null;
@@ -43,14 +43,14 @@ public class GitLogInterpreter {
         String authorKey = commitInfo.get(2).trim().split(" ")[0];
         GitHubCollaborator collaborator = collaboratorList.get(authorKey);
         if (collaborator == null) this.logger.warn("No author found: Commit [{}]", sha);
-        return new GitHubCommit(sha, message, date, collaborator, files);
+        return new GitHubCommit(projectId, sha, message, date, collaborator, files);
     }
 
-    public GitHubCommitList createCommitsList(List<List<String>> logCommits) {
+    public GitHubCommitList createCommitsList(List<List<String>> logCommits, String projectId) {
         try {
             return commitList.addAll(
                     logCommits.stream()
-                            .map(this::createCommit)
+                            .map(sList -> this.createCommit(sList, projectId))
                             .filter(Objects::nonNull)
                             .sorted()
                             .toList()

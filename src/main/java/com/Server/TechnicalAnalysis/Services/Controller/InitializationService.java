@@ -1,4 +1,4 @@
-package com.Server.TechnicalAnalysis.Services.REST;
+package com.Server.TechnicalAnalysis.Services.Controller;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
@@ -12,6 +12,7 @@ import com.Server.TechnicalAnalysis.Services.CLI.GitHubCLI;
 import com.Server.TechnicalAnalysis.Services.DB.DatabaseController;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreter;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogReader;
+import com.Server.TechnicalAnalysis.Services.Web.HttpController;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -25,7 +26,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class InitializationService {
@@ -59,6 +63,8 @@ public class InitializationService {
     private GitLogInterpreter gitLogInterpreter;
     @Autowired
     private SonarAnalysis sonarAnalysis;
+    @Autowired
+    private HttpController httpController;
 
     private int COMMITS_COUNT;
     private String PROJECT_ID;
@@ -70,7 +76,7 @@ public class InitializationService {
         this.dbController.setFileRepository(fileRepository);
     }
 
-    private void analyzeCommits(GitHubCommitList commits, String repositoryName, String repositoryOwner) {
+    private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndeces, String repositoryName, String repositoryOwner) {
         sonarAnalysis.setParams(
                 repositoryOwner,
                 String.format("%s\\%s", this.gitCLI.getDirectory(), repositoryName),
@@ -78,11 +84,17 @@ public class InitializationService {
                 sonarQubeUsername,
                 sonarQubePassword
         );
-        for (GitHubCommit commit : commits) {
-            this.gitHubCLI.addPullRequestTags(commit);
+        for (int i = 0; i < weekIndeces.size(); i++) {
+            Integer weekIndex = weekIndeces.get(i);
+            GitHubCommit weekCommit = commits.get(weekIndex);
+            this.gitHubCLI.addPullRequestTags(weekCommit);
             try {
-                sonarAnalysis.analyze(commit);
-                commit.setProjectName(PROJECT_ID);
+                Set<GitHubFile> allFiles = new HashSet<>();
+                List<GitHubCommit> subList = commits.subList((i == 0) ? 0 : weekIndeces.get(i - 1) + 1, weekIndex + 1);
+                for (GitHubCommit subCommit : subList) {
+                    allFiles.addAll(subCommit.getFiles());
+                }
+                sonarAnalysis.analyze(weekCommit, allFiles);
             } catch (IOException | InterruptedException e) {
                 this.logger.error("An unexpected exception occurred");
             }
@@ -91,7 +103,7 @@ public class InitializationService {
         if (succeed != 0) this.logger.warn("Pull request tags: Succeed {}", succeed);
         int failed = this.gitHubCLI.getFailed();
         if (failed != 0) this.logger.warn("Pull request tags: Failed {}", failed);
-        this.logger.info("Analyzed commits: {}", commits.size());
+        this.logger.info("Analyzed commits: {}", weekIndeces.size());
     }
 
     private void deleteRepositoryDirectory() {
@@ -114,15 +126,15 @@ public class InitializationService {
     // todo: fix error handling
     // todo: fix analysis on existing projects
     public void startInitialization(String link) {
-        // Add repositories to DatabaseController
-        this.addRepositories();
-
         // Get repo link information
         String[] splitLink = link.split("/");
         if (splitLink.length <= 1) return;
         String repositoryName = splitLink[splitLink.length - 1];
         String repositoryOwner = splitLink[splitLink.length - 2];
         PROJECT_ID = repositoryOwner + "/" + repositoryName;
+
+        // Add repositories to DatabaseController
+        this.addRepositories();
 
         this.gitCLI.setWorkingRepository(repositoryName);
         this.gitCLI.cloneRepository(link);
@@ -139,16 +151,17 @@ public class InitializationService {
 
         // Request commits
         GitHubCommitList commits;
+        List<Integer> weekIndexes;
         try (BufferedReader bufferedReader = this.gitCLI.LogCommits()) {
             List<List<String>> commitsLogList = this.gitLogReader.readCommits(bufferedReader);
-            commits = this.gitLogInterpreter.createCommitsList(commitsLogList);
-            commits.filterPerWeek();
+            commits = this.gitLogInterpreter.createCommitsList(commitsLogList, PROJECT_ID);
+            weekIndexes = commits.filterPerWeek();
         } catch (IOException e) {
             logger.error("IOException Commits error: {}", e.getMessage());
             return;
         }
 
-        this.analyzeCommits(commits, repositoryName, repositoryOwner);
+        this.analyzeCommits(commits, weekIndexes, repositoryName, repositoryOwner);
 
         // Save entities
         this.dbController.writeCollaborators(collaborators);
@@ -158,12 +171,12 @@ public class InitializationService {
         COMMITS_COUNT = commits.size();
 
         try {
-            File analysisFile = new File("./src/main/resources/static/" + repositoryOwner + "_" + repositoryName + ".csv");
+            File analysisFile = new File(repositoryOwner + "_" + repositoryName + ".csv");
             FileWriter writer = new FileWriter(analysisFile, true);
             // header: project_name; file; package (relative path); sha; tag; contributor; sqale_index; ncloc; code_smells; files; functions; comment_lines; td->td_min
             if (analysisFile.length() == 0)
                 writer.append("PROJECT_NAME;FILE;PACKAGE;SHA;TAGS;CONTRIBUTOR;TD;COMPLEXITY;LOC;CODE_SMELLS;FILES;FUNCTIONS;COMMENT_LINES").append("\n");
-            for (GitHubCommit commit : commits) {
+            for (GitHubCommit commit : commits.stream().filter(GitHubCommit::isWeekCommit).toList()) {
                 List<GitHubFile> files = commit.getFiles();
                 for (GitHubFile file : files)
                     writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;",
@@ -184,7 +197,7 @@ public class InitializationService {
             }
             writer.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            this.logger.error("Results logging failed");
         }
         // Delete cloned repository directory
         this.resetApplication();

@@ -3,13 +3,16 @@ package com.Server.TechnicalAnalysis.Services.Analysis;
 import com.Server.TechnicalAnalysis.Enums.AnalysisMetrics;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
+import com.Server.TechnicalAnalysis.Models.GitHubMetricEntity;
 import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
+import com.Server.TechnicalAnalysis.Services.Web.HttpController;
 import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -18,16 +21,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 @Service
 public class SonarAnalysis {
     private final Logger logger = LoggerFactory.getLogger(SonarAnalysis.class);
     @Autowired
     private GitCLI gitCLI;
+    @Autowired
+    private HttpController httpController;
     private String projectOwner;
     private String projectName;
     private String repoName;
@@ -35,6 +37,7 @@ public class SonarAnalysis {
     private String sonarQubeUrl;
     private String sonarQubeUser;
     private String sonarQubePassword;
+    private GitHubCommit commit;
     private Integer TD;
     private Integer Complexity;
     private Integer LOC;
@@ -59,8 +62,10 @@ public class SonarAnalysis {
         this.repoName = repoNameArray[repoNameArray.length - 1];
     }
 
-    public void analyze(GitHubCommit commit) throws IOException, InterruptedException {
-        this.sha = commit.getSha();
+    public void analyze(GitHubCommit c, Set<GitHubFile> files) throws IOException, InterruptedException {
+        this.commit = c;
+        this.sha = this.commit.getSha();
+        this.commit.setIsWeekCommit();
         //checkout
         checkoutToCommit();
         //create file
@@ -68,26 +73,7 @@ public class SonarAnalysis {
         //start analysis
         makeSonarAnalysis();
         //Get metrics from SonarQube
-        getMetricsFromSonarQube();
-        //Set metrics to commit
-        commit.setComplexity(this.Complexity);
-        commit.setTd(this.TD);
-        commit.setLoc(this.LOC);
-        commit.setNumFiles(this.FILES);
-        commit.setFunctions(this.FUNCTIONS);
-        commit.setCommentLines(this.COMMENT_LINES);
-        commit.setCodeSmells(this.CODE_SMELLS);
-        List<GitHubFile> files = commit.getFiles();
-        for (GitHubFile file : files) {
-            Map<AnalysisMetrics, Integer> metrics = getFileMetricFromSonarQube(file.getPath());
-            file.setComplexity(metrics.get(AnalysisMetrics.COMPLEXITY));
-            file.setTd(metrics.get(AnalysisMetrics.TD));
-            file.setLoc(metrics.get(AnalysisMetrics.LOC));
-            file.setNumFiles(metrics.get(AnalysisMetrics.FILES));
-            file.setFunctions(metrics.get(AnalysisMetrics.FUNCTIONS));
-            file.setCommentLines(metrics.get(AnalysisMetrics.COMMENT_LINES));
-            file.setCodeSmells(metrics.get(AnalysisMetrics.CODE_SMELLS));
-        }
+        getMetricsFromSonarQube(files);
     }
 
     private void checkoutToCommit() throws IOException {
@@ -193,38 +179,92 @@ public class SonarAnalysis {
         Thread.sleep(500);
     }
 
-    private void getMetricsFromSonarQube() {
+    private void populateMetricsFromComponent(GitHubMetricEntity commit, JSONObject component) {
+        if (component == null) return;
+        JSONArray componentMeasures = (JSONArray) component.get("measures");
+        for (Object object : componentMeasures) {
+            JSONObject jsonObject = (JSONObject) object;
+            String metric = jsonObject.get("metric").toString();
+            int value = Integer.parseInt(jsonObject.get("value").toString());
+            switch (metric) {
+                case "sqale_index":
+                    commit.setTd(value);
+                    break;
+                case "complexity":
+                    commit.setComplexity(value);
+                    break;
+                case "ncloc":
+                    commit.setLoc(value);
+                    break;
+                case "code_smells":
+                    commit.setCodeSmells(value);
+                    break;
+                case "files":
+                    commit.setNumFiles(value);
+                    break;
+                case "functions":
+                    commit.setFunctions(value);
+                    break;
+                case "comment_lines":
+                    commit.setCommentLines(value);
+                    break;
+            }
+        }
+    }
+
+    private void populateFileMetrics(Set<GitHubFile> files,  JSONArray components) {
+        Map<String, JSONObject> tempMap = new HashMap<>();
+        for (Object object : components) {
+            JSONObject component = (JSONObject) object;
+            tempMap.put(component.get("path").toString(), component);
+        }
+        for (GitHubFile file : files) {
+            this.populateMetricsFromComponent(file, tempMap.get(file.getPath()));
+        }
+    }
+
+    private void getMetricsFromSonarQube(Set<GitHubFile> files) {
         try {
             Unirest.setTimeouts(0, 0);
-            HttpResponse<String> response = Unirest
-                    .get(String.format("%s/api/measures/component?component=%s:%s&metricKeys=sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines",
-                            this.sonarQubeUrl, this.projectOwner, this.repoName))
-                    .basicAuth(this.sonarQubeUser, this.sonarQubePassword)
-                    .asString();
-            if (response.getStatus() != 200)
-                logger.error("MetricFromSonarQube: Status code != 200");
-            else {
-                JSONArray jsonarr_1 = getJsonArray(response.getRawBody());
+            HttpResponse<JsonNode> jsonNode = httpController.getRequest(new HttpController.HttpRequest()
+                    .setUrl(this.sonarQubeUrl + "/api/measures/component_tree")
+                    .setParam("component", this.projectOwner + ":" + this.repoName)
+                    .setParam("metricKeys", "sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines")
+                    .setAuth(this.sonarQubeUser, this.sonarQubePassword));
+            if (Objects.isNull(jsonNode) || jsonNode.getStatus() != 200) throw new Exception("Request failed");
+            this.populateMetricsFromComponent(commit, (JSONObject) jsonNode.getBody().getObject().get("baseComponent"));
+            this.populateFileMetrics(files, (JSONArray) jsonNode.getBody().getObject().get("components"));
 
-                for (Object o : jsonarr_1) {
-                    JSONObject jsonobj_1 = (JSONObject) o;
-                    if (jsonobj_1.get("metric").toString().equals("sqale_index"))
-                        this.TD = Integer.parseInt(jsonobj_1.get("value").toString());
-                    if (jsonobj_1.get("metric").toString().equals("complexity"))
-                        this.Complexity = Integer.parseInt(jsonobj_1.get("value").toString());
-                    if (jsonobj_1.get("metric").toString().equals("ncloc"))
-                        this.LOC = Integer.parseInt(jsonobj_1.get("value").toString());
-                    if (jsonobj_1.get("metric").toString().equals("files"))
-                        this.FILES = Integer.parseInt(jsonobj_1.get("value").toString());
-                    if (jsonobj_1.get("metric").toString().equals("functions"))
-                        this.FUNCTIONS = Integer.parseInt(jsonobj_1.get("value").toString());
-                    if (jsonobj_1.get("metric").toString().equals("comment_lines"))
-                        this.COMMENT_LINES = Integer.parseInt(jsonobj_1.get("value").toString());
-                    if (jsonobj_1.get("metric").toString().equals("code_smells"))
-                        this.CODE_SMELLS = Integer.parseInt(jsonobj_1.get("value").toString());
-                }
-            }
-        } catch (ParseException | UnirestException e) {
+//            HttpResponse<String> response = Unirest
+//                    .get(String.format("%s/api/measures/component?component=%s:%s&metricKeys=sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines",
+//                            this.sonarQubeUrl, this.projectOwner, this.repoName))
+//                    .basicAuth(this.sonarQubeUser, this.sonarQubePassword)
+//                    .asString();
+//            if (response.getStatus() != 200)
+//                logger.error("MetricFromSonarQube: Status code != 200");
+//            else {
+//                JSONArray jsonarr_1 = getJsonArray(response.getRawBody());
+//
+//                for (Object o : jsonarr_1) {
+//                    JSONObject jsonobj_1 = (JSONObject) o;
+//                    if (jsonobj_1.get("metric").toString().equals("sqale_index"))
+//                        this.TD = Integer.parseInt(jsonobj_1.get("value").toString());
+//                    if (jsonobj_1.get("metric").toString().equals("complexity"))
+//                        this.Complexity = Integer.parseInt(jsonobj_1.get("value").toString());
+//                    if (jsonobj_1.get("metric").toString().equals("ncloc"))
+//                        this.LOC = Integer.parseInt(jsonobj_1.get("value").toString());
+//                    if (jsonobj_1.get("metric").toString().equals("files"))
+//                        this.FILES = Integer.parseInt(jsonobj_1.get("value").toString());
+//                    if (jsonobj_1.get("metric").toString().equals("functions"))
+//                        this.FUNCTIONS = Integer.parseInt(jsonobj_1.get("value").toString());
+//                    if (jsonobj_1.get("metric").toString().equals("comment_lines"))
+//                        this.COMMENT_LINES = Integer.parseInt(jsonobj_1.get("value").toString());
+//                    if (jsonobj_1.get("metric").toString().equals("code_smells"))
+//                        this.CODE_SMELLS = Integer.parseInt(jsonobj_1.get("value").toString());
+//                }
+//            }
+        } catch (
+                Exception e) {
             this.logger.error(e.getMessage(), e);
         }
     }
