@@ -54,7 +54,7 @@ public abstract class SimpleCLI {
     }
 
     public void setWorkingRepository(String repoName) {
-        this.repoDir = new File(String.format("%s\\%s", this.REPOSITORIES_PATH_NAME, repoName));
+        this.repoDir = new File(String.format("%s%s%s", this.REPOSITORIES_PATH_NAME, TechnicalAnalysisApplication.PATH_SEPARATOR, repoName));
     }
 
     static class ProjectExistsException extends Exception {}

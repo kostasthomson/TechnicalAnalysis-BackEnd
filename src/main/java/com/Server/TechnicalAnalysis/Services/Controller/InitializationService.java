@@ -13,6 +13,7 @@ import com.Server.TechnicalAnalysis.Services.DB.DatabaseController;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreter;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogReader;
 import com.Server.TechnicalAnalysis.Services.Web.HttpController;
+import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -79,7 +80,7 @@ public class InitializationService {
     private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndeces, String repositoryName, String repositoryOwner) {
         sonarAnalysis.setParams(
                 repositoryOwner,
-                String.format("%s\\%s", this.gitCLI.getDirectory(), repositoryName),
+                String.format("%s%s%s", this.gitCLI.getDirectory(), TechnicalAnalysisApplication.PATH_SEPARATOR, repositoryName),
                 sonarQubeUrl,
                 sonarQubeUsername,
                 sonarQubePassword
@@ -179,7 +180,7 @@ public class InitializationService {
             for (GitHubCommit commit : commits.stream().filter(GitHubCommit::isWeekCommit).toList()) {
                 List<GitHubFile> files = commit.getFiles();
                 for (GitHubFile file : files)
-                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;",
+                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
                             PROJECT_ID,
                             file.getName(),
                             file.getPath(),

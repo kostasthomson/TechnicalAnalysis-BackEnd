@@ -11,10 +11,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.nio.file.FileSystems;
+
 @EnableTransactionManagement
 @EnableNeo4jRepositories
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class TechnicalAnalysisApplication {
+    public static String PATH_SEPARATOR = FileSystems.getDefault().getSeparator();
     public static void main(String[] args) {
         AnsiOutput.setEnabled(AnsiOutput.Enabled.ALWAYS);
         SpringApplication.run(TechnicalAnalysisApplication.class, args);

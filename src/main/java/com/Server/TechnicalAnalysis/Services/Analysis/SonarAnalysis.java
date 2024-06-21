@@ -58,7 +58,7 @@ public class SonarAnalysis {
         this.sonarQubeUrl = url;
         this.sonarQubeUser = user;
         this.sonarQubePassword = pass;
-        String[] repoNameArray = this.projectName.split("\\\\");
+        String[] repoNameArray = this.projectName.split(TechnicalAnalysisApplication.PATH_SEPARATOR);
         this.repoName = repoNameArray[repoNameArray.length - 1];
     }
 
@@ -153,7 +153,7 @@ public class SonarAnalysis {
         } else {
             try {
                 ProcessBuilder pbuilder = new ProcessBuilder("bash", "-c",
-                        "cd '" + System.getProperty("user.dir") + "/" + this.projectName + "' ; ../sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner");
+                        "cd '" + System.getProperty("user.dir") + "/" + this.projectName + "' ; ../../sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner");
                 File err = new File("err.txt");
                 pbuilder.redirectError(err);
                 Process p = pbuilder.start();
