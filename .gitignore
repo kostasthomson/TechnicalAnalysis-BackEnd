@@ -33,7 +33,6 @@ build/
 .vscode/
 
 Repositories/
-sonar-scanner*
-*.properties
+sonar-scanner-4.8.0.2856-windows
 *.log
 *.csv
