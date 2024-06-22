@@ -53,7 +53,7 @@ services:
        - SPRING_NEO4J_AUTHENTICATION_PASSWORD=kermit-delta-cliff-admiral-salsa-5008
        - SONAR_QUBE_URL=http://sonarqube:9000
        - SONAR_QUBE_USERNAME=admin
-       - SONAR_QUBE_PASSWORD=admin1
+       - SONAR_QUBE_PASSWORD=admin
     ports:
       - '8085:8080'
 

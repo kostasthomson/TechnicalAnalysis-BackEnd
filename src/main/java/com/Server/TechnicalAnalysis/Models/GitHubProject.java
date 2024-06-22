@@ -10,7 +10,7 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 import java.util.List;
 
 @Node("Project")
-public class GitHubProject {
+public class GitHubProject extends GitHubMetricEntity {
     @Id
     @GeneratedValue(UUIDStringGenerator.class)
     private String node_id;
@@ -19,13 +19,6 @@ public class GitHubProject {
     private List<GitHubCollaborator> collaborators;
 
     private String name;
-    private Integer complexity;
-    private Integer loc;
-    private Integer td;
-    private Integer numFiles;
-    private Integer functions;
-    private Integer commentLines;
-    private Integer codeSmells;
     private int maxTd;
 
     public GitHubProject() {
@@ -44,30 +37,6 @@ public class GitHubProject {
         this.maxTd = maxTd;
     }
 
-    public Integer getNumFiles() {
-        return numFiles;
-    }
-
-    public void setNumFiles(Integer numFiles) {
-        this.numFiles = numFiles;
-    }
-
-    public Integer getCommentLines() {
-        return commentLines;
-    }
-
-    public void setCommentLines(Integer commentLines) {
-        this.commentLines = commentLines;
-    }
-
-    public Integer getCodeSmells() {
-        return codeSmells;
-    }
-
-    public void setCodeSmells(Integer codeSmells) {
-        this.codeSmells = codeSmells;
-    }
-
     public int getMaxTd() {
         return maxTd;
     }
@@ -84,14 +53,6 @@ public class GitHubProject {
         this.node_id = node_id;
     }
 
-    public Integer getFunctions() {
-        return functions;
-    }
-
-    public void setFunctions(Integer functions) {
-        this.functions = functions;
-    }
-
     public List<GitHubCollaborator> getCollaborators() {
         return collaborators;
     }
@@ -102,30 +63,6 @@ public class GitHubProject {
 
     public void setCollaborators(GitHubCollaboratorList collaborators) {
         collaborators.forEach(col -> this.collaborators.add((GitHubCollaborator) col));
-    }
-
-    public Integer getComplexity() {
-        return complexity;
-    }
-
-    public void setComplexity(Integer complexity) {
-        this.complexity = complexity;
-    }
-
-    public Integer getLoc() {
-        return loc;
-    }
-
-    public void setLoc(Integer loc) {
-        this.loc = loc;
-    }
-
-    public Integer getTd() {
-        return td;
-    }
-
-    public void setTd(Integer td) {
-        this.td = td;
     }
 
     public String getName() {

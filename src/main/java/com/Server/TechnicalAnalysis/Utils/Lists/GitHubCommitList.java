@@ -3,7 +3,6 @@ package com.Server.TechnicalAnalysis.Utils.Lists;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

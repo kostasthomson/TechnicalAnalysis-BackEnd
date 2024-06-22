@@ -6,7 +6,6 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Node("Commit")
 public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Comparable<GitHubCommit> {

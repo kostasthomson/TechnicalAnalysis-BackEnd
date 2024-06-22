@@ -212,7 +212,7 @@ public class SonarAnalysis {
         }
     }
 
-    private void populateFileMetrics(Set<GitHubFile> files,  JSONArray components) {
+    private void populateFileMetrics(Set<GitHubFile> files, JSONArray components) {
         Map<String, JSONObject> tempMap = new HashMap<>();
         for (Object object : components) {
             JSONObject component = (JSONObject) object;
@@ -335,7 +335,7 @@ public class SonarAnalysis {
                     .asString();
             int response_code = response.getStatus();
             if (response_code != 200)
-                logger.error("FinishedAnalyzing: Status code != 200");
+                logger.error("[FinishedAnalyzing] Status code != 200 : {}", response.getBody());
             else {
                 Scanner sc = new Scanner(response.getRawBody());
                 while (sc.hasNext()) {
