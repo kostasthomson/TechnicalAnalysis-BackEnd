@@ -42,7 +42,7 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
         this.date = date;
         this.author = author;
         this.files = files;
-        this.tags = tags;
+        this.setTags(tags);
     }
 
     @Override
@@ -116,6 +116,7 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+        this.files.forEach(file->file.setTags(tags));
     }
 
     public void setIsWeekCommit() {

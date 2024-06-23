@@ -1,19 +1,16 @@
-package com.Server.TechnicalAnalysis.Services.Controller;
+package com.Server.TechnicalAnalysis.Services;
 
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
+import com.Server.TechnicalAnalysis.Models.GitHubProject;
 import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.FileRepository;
 import com.Server.TechnicalAnalysis.Repositories.ProjectRepository;
-import com.Server.TechnicalAnalysis.Services.Analysis.SonarAnalysis;
 import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
 import com.Server.TechnicalAnalysis.Services.CLI.GitHubCLI;
-import com.Server.TechnicalAnalysis.Services.DB.DatabaseController;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreter;
 import com.Server.TechnicalAnalysis.Services.Log.GitLogReader;
-import com.Server.TechnicalAnalysis.Services.Web.HttpController;
-import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -27,6 +24,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,8 +52,6 @@ public class InitializationService {
     private FileRepository fileRepository;
 
     @Autowired
-    private DatabaseController dbController;
-    @Autowired
     private GitCLI gitCLI;
     @Autowired
     private GitHubCLI gitHubCLI;
@@ -69,17 +67,10 @@ public class InitializationService {
     private int COMMITS_COUNT;
     private String PROJECT_ID;
 
-    private void addRepositories() {
-        this.dbController.setProjectRepository(projectRepository);
-        this.dbController.setCollaboratorRepository(collaboratorRepository);
-        this.dbController.setCommitRepository(commitRepository);
-        this.dbController.setFileRepository(fileRepository);
-    }
-
     private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndeces, String repositoryName, String repositoryOwner) {
         sonarAnalysis.setParams(
                 repositoryOwner,
-                String.format("%s%s%s", this.gitCLI.getDirectory(), TechnicalAnalysisApplication.PATH_SEPARATOR, repositoryName),
+                repositoryName,
                 sonarQubeUrl,
                 sonarQubeUsername,
                 sonarQubePassword
@@ -106,7 +97,7 @@ public class InitializationService {
         this.logger.info("Analyzed commits: {}", weekIndeces.size());
     }
 
-    private void deleteRepositoryDirectory() {
+    private void clearRepositoryDirectory() {
         int i = 3;
         while (i-- != 0) {
             try {
@@ -119,22 +110,19 @@ public class InitializationService {
     }
 
     private void resetApplication() {
-        this.deleteRepositoryDirectory();
+        this.clearRepositoryDirectory();
         this.gitLogInterpreter.reset();
     }
 
-    // todo: fix error handling
     // todo: fix analysis on existing projects
     public void startInitialization(String link) {
+        Instant start = Instant.now();
         // Get repo link information
         String[] splitLink = link.split("/");
         if (splitLink.length <= 1) return;
         String repositoryName = splitLink[splitLink.length - 1];
         String repositoryOwner = splitLink[splitLink.length - 2];
         PROJECT_ID = repositoryOwner + "/" + repositoryName;
-
-        // Add repositories to DatabaseController
-        this.addRepositories();
 
         this.gitCLI.setWorkingRepository(repositoryName);
         this.gitCLI.cloneRepository(link);
@@ -164,11 +152,12 @@ public class InitializationService {
         this.analyzeCommits(commits, weekIndexes, repositoryName, repositoryOwner);
 
         // Save entities
-        this.dbController.writeCollaborators(collaborators);
-        this.dbController.createProjectNode(PROJECT_ID, commits.getLatest(), commits.findMaxFileTd());
-        this.dbController.writeCommits(commits);
+        this.collaboratorRepository.saveAll(collaborators);
+        GitHubCommit latestCommit = commits.getLatest();
+        this.projectRepository.save(new GitHubProject(latestCommit.getProjectName(), collaborators, latestCommit, commits.findMaxFileTd()));
+        this.commitRepository.saveAll(commits);
 
-        COMMITS_COUNT = commits.size();
+        COMMITS_COUNT = weekIndexes.size();
 
         try {
             File analysisFile = new File(repositoryOwner + "_" + repositoryName + ".csv");
@@ -201,13 +190,34 @@ public class InitializationService {
         }
         // Delete cloned repository directory
         this.resetApplication();
+        this.addLogResults(start, Instant.now(), link);
     }
 
-    public int getCOMMITS_COUNT() {
-        return this.COMMITS_COUNT;
-    }
-
-    public String getPROJECT_ID() {
-        return this.PROJECT_ID;
+    private void addLogResults(Instant start, Instant end, String link) {
+        Duration elapsedTime = Duration.between(start, end);
+        long fullSeconds = elapsedTime.getSeconds();
+        long hours = fullSeconds / 3600;
+        long minutes = fullSeconds % 3600 / 60;
+        long seconds = fullSeconds % 60;
+        this.logger.info("Execution time -> {}:{}:{}", hours, minutes, seconds);
+        this.logger.info("Set up complete {}", link);
+        try {
+            File logFile = new File("./RESULTS_LOG.log");
+            FileWriter writer = new FileWriter(logFile, true);
+            // header: timestamp, projectId, commits, timeElapsed
+            if (logFile.length() == 0)
+                writer.append("TIMESTAMP, PROJECT, COMMITS, INIT_TIME").append("\n");
+            writer.append(String.format("%s,%s,%s,%s:%s:%s",
+                    new Timestamp(System.currentTimeMillis()),
+                    this.PROJECT_ID,
+                    this.COMMITS_COUNT,
+                    hours,
+                    minutes,
+                    seconds
+            )).append("\n");
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

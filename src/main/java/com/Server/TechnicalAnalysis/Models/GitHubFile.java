@@ -5,6 +5,8 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
+import java.util.List;
+
 @Node("File")
 public class GitHubFile extends GitHubMetricEntity implements GitHubEntity {
     @Id
@@ -12,6 +14,7 @@ public class GitHubFile extends GitHubMetricEntity implements GitHubEntity {
     private String node_id;
     private String name;
     private String path;
+    private List<String> tags;
 
     public GitHubFile() {
     }
@@ -20,13 +23,6 @@ public class GitHubFile extends GitHubMetricEntity implements GitHubEntity {
         this.path = fileName;
         String[] nameArray = fileName.split("/");
         this.name = nameArray[nameArray.length - 1];
-    }
-
-    public GitHubFile(String name, Integer complexity, Integer loc, Integer td) {
-        this.name = name;
-        this.complexity = complexity;
-        this.loc = loc;
-        this.td = td;
     }
 
     public boolean isJava() {
@@ -57,13 +53,26 @@ public class GitHubFile extends GitHubMetricEntity implements GitHubEntity {
         this.path = path;
     }
 
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public List<String> getTags() {
+        return this.tags;
+    }
+
     @Override
     public String toString() {
-        return this.name;
+        return this.path;
     }
 
     @Override
     public boolean equals(Object object) {
         return this.path.equals(((GitHubFile) object).path);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.path.hashCode();
     }
 }

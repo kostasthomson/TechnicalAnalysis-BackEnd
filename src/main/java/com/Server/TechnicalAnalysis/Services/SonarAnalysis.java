@@ -1,11 +1,10 @@
-package com.Server.TechnicalAnalysis.Services.Analysis;
+package com.Server.TechnicalAnalysis.Services;
 
 import com.Server.TechnicalAnalysis.Enums.AnalysisMetrics;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
 import com.Server.TechnicalAnalysis.Models.GitHubMetricEntity;
 import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
-import com.Server.TechnicalAnalysis.Services.Web.HttpController;
 import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -48,18 +47,17 @@ public class SonarAnalysis {
 
     public void setParams(
             String projectOwner,
-            String projectName,
+            String repoName,
             String url,
             String user,
             String pass
     ) {
         this.projectOwner = projectOwner;
-        this.projectName = projectName;
+        this.repoName = repoName;
+        this.projectName = String.format("%s%s%s", this.gitCLI.getDirectory(), TechnicalAnalysisApplication.PATH_SEPARATOR, this.repoName);
         this.sonarQubeUrl = url;
         this.sonarQubeUser = user;
         this.sonarQubePassword = pass;
-        String[] repoNameArray = this.projectName.split(TechnicalAnalysisApplication.PATH_SEPARATOR);
-        this.repoName = repoNameArray[repoNameArray.length - 1];
     }
 
     public void analyze(GitHubCommit c, Set<GitHubFile> files) throws IOException, InterruptedException {
@@ -234,35 +232,6 @@ public class SonarAnalysis {
             if (Objects.isNull(jsonNode) || jsonNode.getStatus() != 200) throw new Exception("Request failed");
             this.populateMetricsFromComponent(commit, (JSONObject) jsonNode.getBody().getObject().get("baseComponent"));
             this.populateFileMetrics(files, (JSONArray) jsonNode.getBody().getObject().get("components"));
-
-//            HttpResponse<String> response = Unirest
-//                    .get(String.format("%s/api/measures/component?component=%s:%s&metricKeys=sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines",
-//                            this.sonarQubeUrl, this.projectOwner, this.repoName))
-//                    .basicAuth(this.sonarQubeUser, this.sonarQubePassword)
-//                    .asString();
-//            if (response.getStatus() != 200)
-//                logger.error("MetricFromSonarQube: Status code != 200");
-//            else {
-//                JSONArray jsonarr_1 = getJsonArray(response.getRawBody());
-//
-//                for (Object o : jsonarr_1) {
-//                    JSONObject jsonobj_1 = (JSONObject) o;
-//                    if (jsonobj_1.get("metric").toString().equals("sqale_index"))
-//                        this.TD = Integer.parseInt(jsonobj_1.get("value").toString());
-//                    if (jsonobj_1.get("metric").toString().equals("complexity"))
-//                        this.Complexity = Integer.parseInt(jsonobj_1.get("value").toString());
-//                    if (jsonobj_1.get("metric").toString().equals("ncloc"))
-//                        this.LOC = Integer.parseInt(jsonobj_1.get("value").toString());
-//                    if (jsonobj_1.get("metric").toString().equals("files"))
-//                        this.FILES = Integer.parseInt(jsonobj_1.get("value").toString());
-//                    if (jsonobj_1.get("metric").toString().equals("functions"))
-//                        this.FUNCTIONS = Integer.parseInt(jsonobj_1.get("value").toString());
-//                    if (jsonobj_1.get("metric").toString().equals("comment_lines"))
-//                        this.COMMENT_LINES = Integer.parseInt(jsonobj_1.get("value").toString());
-//                    if (jsonobj_1.get("metric").toString().equals("code_smells"))
-//                        this.CODE_SMELLS = Integer.parseInt(jsonobj_1.get("value").toString());
-//                }
-//            }
         } catch (
                 Exception e) {
             this.logger.error(e.getMessage(), e);

@@ -13,13 +13,10 @@ import java.util.List;
 public class GitHubProject extends GitHubMetricEntity {
     @Id
     @GeneratedValue(UUIDStringGenerator.class)
-    private String node_id;
-
-    @Relationship(type = "CONTRIBUTE", direction = Relationship.Direction.INCOMING)
-    private List<GitHubCollaborator> collaborators;
-
     private String name;
     private int maxTd;
+    @Relationship(type = "CONTRIBUTE", direction = Relationship.Direction.INCOMING)
+    private List<GitHubCollaborator> collaborators;
 
     public GitHubProject() {
     }
@@ -43,14 +40,6 @@ public class GitHubProject extends GitHubMetricEntity {
 
     public void setMaxTd(int maxTd) {
         this.maxTd = maxTd;
-    }
-
-    public String getNode_id() {
-        return node_id;
-    }
-
-    public void setNode_id(String node_id) {
-        this.node_id = node_id;
     }
 
     public List<GitHubCollaborator> getCollaborators() {

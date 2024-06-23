@@ -1,4 +1,4 @@
-package com.Server.TechnicalAnalysis.Services.Web;
+package com.Server.TechnicalAnalysis.Services;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;

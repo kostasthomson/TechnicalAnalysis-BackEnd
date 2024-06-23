@@ -13,6 +13,11 @@ import java.util.Optional;
 public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
     private final List<Integer> weekIndexes = new ArrayList<>();
 
+    public void clear() {
+        weekIndexes.clear();
+        super.clear();
+    }
+
     public GitHubCommitList addAll(List<GitHubCommit> commits) {
         list.addAll(commits);
         list.forEach(commit -> map.put(commit.getSha(), list.indexOf(commit)));
