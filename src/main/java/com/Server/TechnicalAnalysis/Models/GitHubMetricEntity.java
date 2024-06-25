@@ -64,4 +64,36 @@ public abstract class GitHubMetricEntity {
     public void setCodeSmells(Integer code_smells) {
         this.codeSmells = code_smells;
     }
+
+    protected boolean hasMetrics() {
+        return td != null &&
+                complexity != null &&
+                loc != null &&
+                numFiles != null &&
+                functions != null &&
+                commentLines != null &&
+                codeSmells != null;
+    }
+
+    public boolean hasComplexity() {
+        return this.complexity != null;
+    }
+    public boolean hasLoc() {
+        return this.loc != null;
+    }
+    public boolean hasTd() {
+        return this.td != null;
+    }
+    public boolean hasNumFiles() {
+        return this.numFiles != null;
+    }
+    public boolean hasFunctions() {
+        return this.functions != null;
+    }
+    public boolean hasCommentLines() {
+        return this.commentLines != null;
+    }
+    public boolean hasCodeSmells() {
+        return this.codeSmells != null;
+    }
 }

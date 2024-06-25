@@ -27,9 +27,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class InitializationService {
@@ -80,10 +78,14 @@ public class InitializationService {
             GitHubCommit weekCommit = commits.get(weekIndex);
             this.gitHubCLI.addPullRequestTags(weekCommit);
             try {
-                Set<GitHubFile> allFiles = new HashSet<>();
+                HashMap<String, List<GitHubFile>> allFiles = new HashMap<>();
                 List<GitHubCommit> subList = commits.subList((i == 0) ? 0 : weekIndeces.get(i - 1) + 1, weekIndex + 1);
                 for (GitHubCommit subCommit : subList) {
-                    allFiles.addAll(subCommit.getFiles());
+                    for (GitHubFile file : subCommit.getFiles()) {
+                        List<GitHubFile> stored = allFiles.getOrDefault(file.getPath(), new ArrayList<>());
+                        stored.add(file);
+                        allFiles.put(file.getPath(), stored);
+                    }
                 }
                 sonarAnalysis.analyze(weekCommit, allFiles);
             } catch (IOException | InterruptedException e) {
@@ -150,6 +152,8 @@ public class InitializationService {
         }
 
         this.analyzeCommits(commits, weekIndexes, repositoryName, repositoryOwner);
+
+        commits.filterFilesWithMetrics();
 
         // Save entities
         this.collaboratorRepository.saveAll(collaborators);
