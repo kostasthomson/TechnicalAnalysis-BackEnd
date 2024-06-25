@@ -59,17 +59,18 @@ public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
     }
 
     public int findMaxFileTd() {
-        Optional<Integer> value =  new ArrayList<>(list)
-                .stream()
-                .map(GitHubCommit::getFiles)
-                .map(fList -> fList
-                        .stream()
-                        .map(GitHubFile::getTd)
-                        .filter(Objects::nonNull)
-                        .max(Integer::compareTo))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .max(Integer::compareTo);
-        return value.orElse(-1);
+        ArrayList<Integer> tdsList = new ArrayList<>();
+        for (GitHubCommit commit : list) {
+            for (GitHubFile file : commit.getFiles()) {
+                if (!file.hasTd()) continue;
+                tdsList.add(file.getTd());
+            }
+        }
+        Optional<Integer> max = tdsList.stream().max(Integer::compareTo);
+        return max.orElse(-1);
+    }
+
+    public void filterFilesWithMetrics() {
+        list = new ArrayList<>(this.stream().filter(GitHubCommit::hasFileMetrics).toList());
     }
 }

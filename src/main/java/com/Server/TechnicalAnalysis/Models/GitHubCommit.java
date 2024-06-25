@@ -126,4 +126,13 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
     public boolean isWeekCommit() {
         return this.isWeekCommit;
     }
+
+    public boolean hasFileMetrics() {
+        for (GitHubFile file : this.files) {
+            if (!file.hasMetrics()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

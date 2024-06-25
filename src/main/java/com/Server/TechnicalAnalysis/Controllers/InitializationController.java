@@ -16,7 +16,7 @@ public class InitializationController {
     private InitializationService initializationService;
 
     @GetMapping
-    public void InitializeApplication(@RequestParam String link) {
+    public void getInitializeApplication(@RequestParam String link) {
         this.initializationService.startInitialization(link);
     }
 }

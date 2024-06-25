@@ -60,7 +60,7 @@ public class SonarAnalysis {
         this.sonarQubePassword = pass;
     }
 
-    public void analyze(GitHubCommit c, Set<GitHubFile> files) throws IOException, InterruptedException {
+    public void analyze(GitHubCommit c, HashMap<String, List<GitHubFile>> files) throws IOException, InterruptedException {
         this.commit = c;
         this.sha = this.commit.getSha();
         this.commit.setIsWeekCommit();
@@ -177,7 +177,7 @@ public class SonarAnalysis {
         Thread.sleep(500);
     }
 
-    private void populateMetricsFromComponent(GitHubMetricEntity commit, JSONObject component) {
+    private void populateMetricsFromComponent(GitHubMetricEntity metricEntity, JSONObject component) {
         if (component == null) return;
         JSONArray componentMeasures = (JSONArray) component.get("measures");
         for (Object object : componentMeasures) {
@@ -186,42 +186,44 @@ public class SonarAnalysis {
             int value = Integer.parseInt(jsonObject.get("value").toString());
             switch (metric) {
                 case "sqale_index":
-                    commit.setTd(value);
+                    metricEntity.setTd(value);
                     break;
                 case "complexity":
-                    commit.setComplexity(value);
+                    metricEntity.setComplexity(value);
                     break;
                 case "ncloc":
-                    commit.setLoc(value);
+                    metricEntity.setLoc(value);
                     break;
                 case "code_smells":
-                    commit.setCodeSmells(value);
+                    metricEntity.setCodeSmells(value);
                     break;
                 case "files":
-                    commit.setNumFiles(value);
+                    metricEntity.setNumFiles(value);
                     break;
                 case "functions":
-                    commit.setFunctions(value);
+                    metricEntity.setFunctions(value);
                     break;
                 case "comment_lines":
-                    commit.setCommentLines(value);
+                    metricEntity.setCommentLines(value);
                     break;
             }
         }
     }
 
-    private void populateFileMetrics(Set<GitHubFile> files, JSONArray components) {
-        Map<String, JSONObject> tempMap = new HashMap<>();
+    private void populateFileMetrics(HashMap<String, List<GitHubFile>> files, JSONArray components) {
+        Map<String, JSONObject> objMap = new HashMap<>();
         for (Object object : components) {
             JSONObject component = (JSONObject) object;
-            tempMap.put(component.get("path").toString(), component);
+            objMap.put(component.get("path").toString(), component);
         }
-        for (GitHubFile file : files) {
-            this.populateMetricsFromComponent(file, tempMap.get(file.getPath()));
-        }
+        files.forEach((key, list) ->
+                list.forEach(file ->
+                        this.populateMetricsFromComponent(file, objMap.get(key))
+                )
+        );
     }
 
-    private void getMetricsFromSonarQube(Set<GitHubFile> files) {
+    private void getMetricsFromSonarQube(HashMap<String, List<GitHubFile>> files) {
         try {
             Unirest.setTimeouts(0, 0);
             HttpResponse<JsonNode> jsonNode = httpController.getRequest(new HttpController.HttpRequest()
