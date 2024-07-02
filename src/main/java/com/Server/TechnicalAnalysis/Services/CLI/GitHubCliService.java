@@ -9,8 +9,8 @@ import java.io.BufferedReader;
 import java.util.List;
 
 @Service
-public class GitHubCLI extends SimpleCLI{
-    private final Logger logger = LoggerFactory.getLogger(GitHubCLI.class);
+public class GitHubCliService extends SimpleCli {
+    private final Logger logger = LoggerFactory.getLogger(GitHubCliService.class);
     private final String GITHUB_COMMAND = "gh";
     private int succeed = 0;
     private int failed = 0;

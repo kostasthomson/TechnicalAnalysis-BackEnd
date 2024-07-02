@@ -18,8 +18,8 @@ import java.util.Locale;
 import java.util.Objects;
 
 @Service
-public class GitLogInterpreter {
-    private final Logger logger = LoggerFactory.getLogger(GitLogInterpreter.class);
+public class GitLogInterpreterService {
+    private final Logger logger = LoggerFactory.getLogger(GitLogInterpreterService.class);
 
     private final GitHubCommitList commitList = new GitHubCommitList();
     private final GitHubCollaboratorList collaboratorList = new GitHubCollaboratorList();

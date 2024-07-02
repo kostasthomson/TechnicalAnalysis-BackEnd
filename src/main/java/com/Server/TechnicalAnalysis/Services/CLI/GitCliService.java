@@ -5,14 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 
 @Service
-public class GitCLI extends SimpleCLI {
-    private final Logger logger = LoggerFactory.getLogger(GitCLI.class);
+public class GitCliService extends SimpleCli {
+    private final Logger logger = LoggerFactory.getLogger(GitCliService.class);
     private final String GIT_COMMAND = "git";
 
     public void cloneRepository(String link) {
@@ -47,18 +45,5 @@ public class GitCLI extends SimpleCLI {
         BufferedReader stdInput = this.runCommand(GIT_COMMAND + " branch");
         String mainBranchName = Objects.requireNonNull(stdInput).readLine().replace("*", "").trim();
         return this.runCommand(GIT_COMMAND + " shortlog -se --branches " + mainBranchName);
-    }
-
-    public void keepFiles(List<String> keepFiles) {
-        File[] dirFiles = this.repoDir.listFiles();
-        if (dirFiles == null) return;
-        for (File file : dirFiles) {
-            String name = file.getName();
-            if (!name.endsWith(".java")) continue;
-            if (!keepFiles.contains(name) && file.isFile()) {
-                if (file.delete()) this.logger.info("File deleted: {}", name);
-                else this.logger.warn("File failed: {}", name);
-            }
-        }
     }
 }

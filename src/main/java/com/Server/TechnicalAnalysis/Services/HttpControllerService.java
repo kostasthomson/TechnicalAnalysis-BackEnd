@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class HttpController {
-    private final Logger logger = LoggerFactory.getLogger(HttpController.class);
+public class HttpControllerService {
+    private final Logger logger = LoggerFactory.getLogger(HttpControllerService.class);
 
     public static class HttpRequest {
         private String url;
         private Map<String, Object> params = new HashMap<>();
-        private String[] auth = new String[2];
+        private final String[] auth = new String[]{"", ""};
 
         public String getUrl() {
             return url;

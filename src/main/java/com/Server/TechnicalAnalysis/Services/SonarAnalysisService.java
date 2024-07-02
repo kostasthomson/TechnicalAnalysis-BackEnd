@@ -1,10 +1,9 @@
 package com.Server.TechnicalAnalysis.Services;
 
-import com.Server.TechnicalAnalysis.Enums.AnalysisMetrics;
 import com.Server.TechnicalAnalysis.Models.GitHubCommit;
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
 import com.Server.TechnicalAnalysis.Models.GitHubMetricEntity;
-import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
+import com.Server.TechnicalAnalysis.Services.CLI.GitCliService;
 import com.Server.TechnicalAnalysis.TechnicalAnalysisApplication;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -12,8 +11,6 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +20,12 @@ import java.io.*;
 import java.util.*;
 
 @Service
-public class SonarAnalysis {
-    private final Logger logger = LoggerFactory.getLogger(SonarAnalysis.class);
+public class SonarAnalysisService {
+    private final Logger logger = LoggerFactory.getLogger(SonarAnalysisService.class);
     @Autowired
-    private GitCLI gitCLI;
+    private GitCliService gitCLI;
     @Autowired
-    private HttpController httpController;
+    private HttpControllerService httpController;
     private String projectOwner;
     private String projectName;
     private String repoName;
@@ -37,13 +34,6 @@ public class SonarAnalysis {
     private String sonarQubeUser;
     private String sonarQubePassword;
     private GitHubCommit commit;
-    private Integer TD;
-    private Integer Complexity;
-    private Integer LOC;
-    private Integer FILES;
-    private Integer FUNCTIONS;
-    private Integer COMMENT_LINES;
-    private Integer CODE_SMELLS;
 
     public void setParams(
             String projectOwner,
@@ -226,7 +216,7 @@ public class SonarAnalysis {
     private void getMetricsFromSonarQube(HashMap<String, List<GitHubFile>> files) {
         try {
             Unirest.setTimeouts(0, 0);
-            HttpResponse<JsonNode> jsonNode = httpController.getRequest(new HttpController.HttpRequest()
+            HttpResponse<JsonNode> jsonNode = httpController.getRequest(new HttpControllerService.HttpRequest()
                     .setUrl(this.sonarQubeUrl + "/api/measures/component_tree")
                     .setParam("component", this.projectOwner + ":" + this.repoName)
                     .setParam("metricKeys", "sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines")
@@ -240,63 +230,10 @@ public class SonarAnalysis {
         }
     }
 
-    public Map<AnalysisMetrics, Integer> getFileMetricFromSonarQube(String filePath) {
-        try {
-            Map<AnalysisMetrics, Integer> metrics = new HashMap<>();
-            Unirest.setTimeouts(0, 0);
-            HttpResponse<String> response = Unirest
-                    .get(String.format("%s/api/measures/component?component=%s:%s:%s&metricKeys=sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines",
-                            this.sonarQubeUrl, this.projectOwner, this.repoName, filePath))
-                    .basicAuth(sonarQubeUser, sonarQubePassword)
-                    .asString();
-            if (response.getStatus() != 200)
-                logger.error("FileMetricFromSonarQube (Status code != 200): {}", response.getBody());
-            else {
-                JSONArray jsonarr_1 = getJsonArray(response.getRawBody());
-
-                for (Object o : jsonarr_1) {
-                    JSONObject jsonobj_1 = (JSONObject) o;
-                    if (jsonobj_1.get("metric").toString().equals("sqale_index"))
-                        metrics.put(AnalysisMetrics.TD, Integer.parseInt(jsonobj_1.get("value").toString()));
-                    if (jsonobj_1.get("metric").toString().equals("complexity"))
-                        metrics.put(AnalysisMetrics.COMPLEXITY, Integer.parseInt(jsonobj_1.get("value").toString()));
-                    if (jsonobj_1.get("metric").toString().equals("ncloc"))
-                        metrics.put(AnalysisMetrics.LOC, Integer.parseInt(jsonobj_1.get("value").toString()));
-                    if (jsonobj_1.get("metric").toString().equals("files"))
-                        metrics.put(AnalysisMetrics.FILES, Integer.parseInt(jsonobj_1.get("value").toString()));
-                    if (jsonobj_1.get("metric").toString().equals("functions"))
-                        metrics.put(AnalysisMetrics.FUNCTIONS, Integer.parseInt(jsonobj_1.get("value").toString()));
-                    if (jsonobj_1.get("metric").toString().equals("comment_lines"))
-                        metrics.put(AnalysisMetrics.COMMENT_LINES, Integer.parseInt(jsonobj_1.get("value").toString()));
-                    if (jsonobj_1.get("metric").toString().equals("code_smells"))
-                        metrics.put(AnalysisMetrics.CODE_SMELLS, Integer.parseInt(jsonobj_1.get("value").toString()));
-                }
-            }
-            return metrics;
-        } catch (ParseException | UnirestException e) {
-            this.logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    private JSONArray getJsonArray(InputStream stream) throws ParseException {
-        Scanner sc = new Scanner(stream);
-        StringBuilder inline = new StringBuilder();
-        while (sc.hasNext()) {
-            inline.append(sc.nextLine());
-        }
-        sc.close();
-
-        JSONParser parse = new JSONParser();
-        JSONObject jobj = (JSONObject) parse.parse(inline.toString());
-        JSONObject jobj1 = (JSONObject) jobj.get("component");
-        return (JSONArray) jobj1.get("measures");
-    }
-
     /*
      * Returns if the project is finished being analyzed
      */
-    public boolean isFinishedAnalyzing() {
+    private boolean isFinishedAnalyzing() {
         boolean finished = false;
         try {
             Unirest.setTimeouts(0, 0);
@@ -322,57 +259,5 @@ public class SonarAnalysis {
             this.logger.error(e.getMessage(), e);
         }
         return finished;
-    }
-
-    public Integer getLOC() {
-        return this.LOC;
-    }
-
-    public Integer getTD() {
-        return this.TD;
-    }
-
-    public Integer getComplexity() {
-        return this.Complexity;
-    }
-
-    public Integer getFILES() {
-        return FILES;
-    }
-
-    public Integer getFUNCTIONS() {
-        return FUNCTIONS;
-    }
-
-    public Integer getCOMMENT_LINES() {
-        return COMMENT_LINES;
-    }
-
-    public Integer getCODE_SMELLS() {
-        return CODE_SMELLS;
-    }
-
-    public String getSonarQubeUrl() {
-        return sonarQubeUrl;
-    }
-
-    public String getSonarQubeUser() {
-        return sonarQubeUser;
-    }
-
-    public String getSonarQubePassword() {
-        return sonarQubePassword;
-    }
-
-    public String getProjectOwner() {
-        return projectOwner;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public String getRepoName() {
-        return repoName;
     }
 }

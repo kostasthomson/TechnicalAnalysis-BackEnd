@@ -7,10 +7,10 @@ import com.Server.TechnicalAnalysis.Repositories.CollaboratorRepository;
 import com.Server.TechnicalAnalysis.Repositories.CommitRepository;
 import com.Server.TechnicalAnalysis.Repositories.FileRepository;
 import com.Server.TechnicalAnalysis.Repositories.ProjectRepository;
-import com.Server.TechnicalAnalysis.Services.CLI.GitCLI;
-import com.Server.TechnicalAnalysis.Services.CLI.GitHubCLI;
-import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreter;
-import com.Server.TechnicalAnalysis.Services.Log.GitLogReader;
+import com.Server.TechnicalAnalysis.Services.CLI.GitCliService;
+import com.Server.TechnicalAnalysis.Services.CLI.GitHubCliService;
+import com.Server.TechnicalAnalysis.Services.Log.GitLogInterpreterService;
+import com.Server.TechnicalAnalysis.Services.Log.GitLogReaderService;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCollaboratorList;
 import com.Server.TechnicalAnalysis.Utils.Lists.GitHubCommitList;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class InitializationService {
@@ -50,22 +52,22 @@ public class InitializationService {
     private FileRepository fileRepository;
 
     @Autowired
-    private GitCLI gitCLI;
+    private GitCliService gitCLI;
     @Autowired
-    private GitHubCLI gitHubCLI;
+    private GitHubCliService gitHubCLI;
     @Autowired
-    private GitLogReader gitLogReader;
+    private GitLogReaderService gitLogReader;
     @Autowired
-    private GitLogInterpreter gitLogInterpreter;
+    private GitLogInterpreterService gitLogInterpreter;
     @Autowired
-    private SonarAnalysis sonarAnalysis;
+    private SonarAnalysisService sonarAnalysis;
     @Autowired
-    private HttpController httpController;
+    private HttpControllerService httpController;
 
     private int COMMITS_COUNT;
     private String PROJECT_ID;
 
-    private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndeces, String repositoryName, String repositoryOwner) {
+    private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndexes, String repositoryName, String repositoryOwner) {
         sonarAnalysis.setParams(
                 repositoryOwner,
                 repositoryName,
@@ -73,13 +75,13 @@ public class InitializationService {
                 sonarQubeUsername,
                 sonarQubePassword
         );
-        for (int i = 0; i < weekIndeces.size(); i++) {
-            Integer weekIndex = weekIndeces.get(i);
+        for (int i = 0; i < weekIndexes.size(); i++) {
+            Integer weekIndex = weekIndexes.get(i);
             GitHubCommit weekCommit = commits.get(weekIndex);
             this.gitHubCLI.addPullRequestTags(weekCommit);
             try {
                 HashMap<String, List<GitHubFile>> allFiles = new HashMap<>();
-                List<GitHubCommit> subList = commits.subList((i == 0) ? 0 : weekIndeces.get(i - 1) + 1, weekIndex + 1);
+                List<GitHubCommit> subList = commits.subList((i == 0) ? 0 : weekIndexes.get(i - 1) + 1, weekIndex + 1);
                 for (GitHubCommit subCommit : subList) {
                     for (GitHubFile file : subCommit.getFiles()) {
                         List<GitHubFile> stored = allFiles.getOrDefault(file.getPath(), new ArrayList<>());
@@ -96,7 +98,7 @@ public class InitializationService {
         if (succeed != 0) this.logger.warn("Pull request tags: Succeed {}", succeed);
         int failed = this.gitHubCLI.getFailed();
         if (failed != 0) this.logger.warn("Pull request tags: Failed {}", failed);
-        this.logger.info("Analyzed commits: {}", weekIndeces.size());
+        this.logger.info("Analyzed commits: {}", weekIndexes.size());
     }
 
     private void clearRepositoryDirectory() {
