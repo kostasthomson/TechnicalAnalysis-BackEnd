@@ -67,29 +67,28 @@ public class InitializationService {
     private int COMMITS_COUNT;
     private String PROJECT_ID;
 
-    private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndexes, String repositoryName, String repositoryOwner) {
-        sonarAnalysis.setParams(
-                repositoryOwner,
-                repositoryName,
-                sonarQubeUrl,
-                sonarQubeUsername,
-                sonarQubePassword
-        );
+    private HashMap<String, List<GitHubFile>> createMapForFiles(GitHubCommitList commits, List<Integer> weekIndexes, int i, int weekIndex) {
+        HashMap<String, List<GitHubFile>> files = new HashMap<>();
+        List<GitHubCommit> subList = commits.subList((i == 0) ? 0 : weekIndexes.get(i - 1) + 1, weekIndex + 1);
+        for (GitHubCommit subCommit : subList) {
+            for (GitHubFile file : subCommit.getFiles()) {
+                List<GitHubFile> stored = files.getOrDefault(file.getPath(), new ArrayList<>());
+                stored.add(file);
+                files.put(file.getPath(), stored);
+            }
+        }
+        return files;
+    }
+
+    private void analyzeCommits(GitHubCommitList commits, List<Integer> weekIndexes) {
         for (int i = 0; i < weekIndexes.size(); i++) {
             Integer weekIndex = weekIndexes.get(i);
             GitHubCommit weekCommit = commits.get(weekIndex);
             this.gitHubCLI.addPullRequestTags(weekCommit);
             try {
-                HashMap<String, List<GitHubFile>> allFiles = new HashMap<>();
-                List<GitHubCommit> subList = commits.subList((i == 0) ? 0 : weekIndexes.get(i - 1) + 1, weekIndex + 1);
-                for (GitHubCommit subCommit : subList) {
-                    for (GitHubFile file : subCommit.getFiles()) {
-                        List<GitHubFile> stored = allFiles.getOrDefault(file.getPath(), new ArrayList<>());
-                        stored.add(file);
-                        allFiles.put(file.getPath(), stored);
-                    }
-                }
+                HashMap<String, List<GitHubFile>> allFiles = this.createMapForFiles(commits, weekIndexes, i, weekIndex);
                 sonarAnalysis.analyze(weekCommit, allFiles);
+                this.logger.info("Analyzed {} / {} weeks", i + 1, weekIndexes.size());
             } catch (IOException | InterruptedException e) {
                 this.logger.error("An unexpected exception occurred");
             }
@@ -98,7 +97,6 @@ public class InitializationService {
         if (succeed != 0) this.logger.warn("Pull request tags: Succeed {}", succeed);
         int failed = this.gitHubCLI.getFailed();
         if (failed != 0) this.logger.warn("Pull request tags: Failed {}", failed);
-        this.logger.info("Analyzed commits: {}", weekIndexes.size());
     }
 
     private void clearRepositoryDirectory() {
@@ -118,17 +116,26 @@ public class InitializationService {
         this.gitLogInterpreter.reset();
     }
 
-    // todo: fix analysis on existing projects
     public void startInitialization(String link) {
         Instant start = Instant.now();
+
         // Get repo link information
         String[] splitLink = link.split("/");
         if (splitLink.length <= 1) return;
         String repositoryName = splitLink[splitLink.length - 1];
         String repositoryOwner = splitLink[splitLink.length - 2];
-        PROJECT_ID = repositoryOwner + "/" + repositoryName;
+        this.PROJECT_ID = repositoryOwner + "/" + repositoryName;
 
         this.gitCLI.setWorkingRepository(repositoryName);
+        this.sonarAnalysis.setParams(
+                repositoryOwner,
+                repositoryName,
+                sonarQubeUrl,
+                sonarQubeUsername,
+                sonarQubePassword
+        );
+
+        // clone repo
         this.gitCLI.cloneRepository(link);
 
         // Request collaborators
@@ -153,8 +160,10 @@ public class InitializationService {
             return;
         }
 
-        this.analyzeCommits(commits, weekIndexes, repositoryName, repositoryOwner);
+        // analyze repo
+        this.analyzeCommits(commits, weekIndexes);
 
+        // filter commits
         commits.filterFilesWithMetrics();
 
         // Save entities
@@ -163,7 +172,7 @@ public class InitializationService {
         this.projectRepository.save(new GitHubProject(latestCommit.getProjectName(), collaborators, latestCommit, commits.findMaxFileTd()));
         this.commitRepository.saveAll(commits);
 
-        COMMITS_COUNT = weekIndexes.size();
+        this.COMMITS_COUNT = weekIndexes.size();
 
         try {
             File analysisFile = new File(repositoryOwner + "_" + repositoryName + ".csv");
