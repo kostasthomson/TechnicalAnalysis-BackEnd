@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class FileService {
-    private final Logger logger = LoggerFactory.getLogger(FileService.class);
+public class FilesService {
+    private final Logger logger = LoggerFactory.getLogger(FilesService.class);
 
     @Autowired
     private FileRepository repository;

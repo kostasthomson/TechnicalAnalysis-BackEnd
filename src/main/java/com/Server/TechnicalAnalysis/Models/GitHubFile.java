@@ -6,7 +6,6 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.util.List;
-import java.util.Objects;
 
 @Node("File")
 public class GitHubFile extends GitHubMetricEntity implements GitHubEntity {

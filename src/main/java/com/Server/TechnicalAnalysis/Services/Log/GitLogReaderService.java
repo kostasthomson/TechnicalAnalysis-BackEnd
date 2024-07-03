@@ -10,9 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class GitLogReader {
-    private final Logger logger = LoggerFactory.getLogger(GitLogReader.class);
-    private final String LOGGER_ERROR_MESSAGE = "GitLogReader: Couldn't read log file {}";
+public class GitLogReaderService {
+    private final Logger logger = LoggerFactory.getLogger(GitLogReaderService.class);
+    private final String LOGGER_ERROR_MESSAGE = "GitLogReaderService: Couldn't read log file {}";
 
     public List<List<String>> readCommits(BufferedReader bufferedReader) {
         try {

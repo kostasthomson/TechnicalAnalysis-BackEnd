@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
-public abstract class SimpleCLI {
-    private final Logger logger = LoggerFactory.getLogger(SimpleCLI.class);
+public abstract class SimpleCli {
+    private final Logger logger = LoggerFactory.getLogger(SimpleCli.class);
     protected final String REPOSITORIES_PATH_NAME = "Repositories";
     protected final File REPOSITORIES_DIR = new File(REPOSITORIES_PATH_NAME);
     protected File repoDir;

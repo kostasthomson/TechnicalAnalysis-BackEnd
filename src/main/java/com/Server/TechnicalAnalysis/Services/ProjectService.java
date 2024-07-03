@@ -26,7 +26,7 @@ public class ProjectService {
     @Autowired
     private ProjectRepository repository;
     @Autowired
-    private HttpController httpController;
+    private HttpControllerService httpController;
 
     public List<GitHubProject> getAllProjects() {
         return this.repository.findAll();
@@ -38,7 +38,7 @@ public class ProjectService {
 
     public int deleteProject(String projectName) {
         HttpResponse<JsonNode> controllerResponse = httpController.postRequest(
-                new HttpController.HttpRequest()
+                new HttpControllerService.HttpRequest()
                         .setUrl(sonarQubeUrl + "/api/projects/delete")
                         .setParam("project", projectName.replace("/", ":"))
                         .setAuth(sonarQubeUsername, sonarQubePassword)

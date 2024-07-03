@@ -2,7 +2,7 @@ package com.Server.TechnicalAnalysis.Controllers;
 
 
 import com.Server.TechnicalAnalysis.Models.GitHubFile;
-import com.Server.TechnicalAnalysis.Services.FileService;
+import com.Server.TechnicalAnalysis.Services.FilesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +16,7 @@ import java.util.List;
 public class FilesController {
 
     @Autowired
-    private FileService service;
+    private FilesService service;
 
     @GetMapping
     public List<GitHubFile> getAllFiles() {
