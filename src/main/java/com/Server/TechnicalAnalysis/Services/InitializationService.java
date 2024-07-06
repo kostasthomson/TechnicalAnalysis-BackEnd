@@ -64,7 +64,9 @@ public class InitializationService {
     @Autowired
     private HttpControllerService httpController;
 
-    private int COMMITS_COUNT;
+    private int ANALYZED_COMMITS;
+    private int PROJECT_COMMITS;
+    private int FILTERED_COMMITS;
     private String PROJECT_ID;
 
     private HashMap<String, List<GitHubFile>> createMapForFiles(GitHubCommitList commits, List<Integer> weekIndexes, int i, int weekIndex) {
@@ -160,11 +162,20 @@ public class InitializationService {
             return;
         }
 
+        this.ANALYZED_COMMITS = weekIndexes.size();
+        this.PROJECT_COMMITS = commits.size();
+
         // analyze repo
         this.analyzeCommits(commits, weekIndexes);
 
+        int unfiltered = commits.size();
+
         // filter commits
         commits.filterFilesWithMetrics();
+
+        this.FILTERED_COMMITS = commits.size();
+
+        this.logger.warn("unfiltered: {} | week: {} | filtered {}", unfiltered, weekIndexes.size(), commits.size());
 
         // Save entities
         this.collaboratorRepository.saveAll(collaborators);
@@ -172,24 +183,23 @@ public class InitializationService {
         this.projectRepository.save(new GitHubProject(latestCommit.getProjectName(), collaborators, latestCommit, commits.findMaxFileTd()));
         this.commitRepository.saveAll(commits);
 
-        this.COMMITS_COUNT = weekIndexes.size();
-
         try {
             File analysisFile = new File(repositoryOwner + "_" + repositoryName + ".csv");
             FileWriter writer = new FileWriter(analysisFile, true);
             // header: project_name; file; package (relative path); sha; tag; contributor; sqale_index; ncloc; code_smells; files; functions; comment_lines; td->td_min
             if (analysisFile.length() == 0)
-                writer.append("PROJECT_NAME;FILE;PACKAGE;SHA;TAGS;CONTRIBUTOR;TD;COMPLEXITY;LOC;CODE_SMELLS;FILES;FUNCTIONS;COMMENT_LINES").append("\n");
-            for (GitHubCommit commit : commits.stream().filter(GitHubCommit::isWeekCommit).toList()) {
+                writer.append("PROJECT_NAME;FILE;PACKAGE;SHA;IS_WEEK;CONTRIBUTOR;TAGS;TD;COMPLEXITY;LOC;CODE_SMELLS;FILES;FUNCTIONS;COMMENT_LINES").append("\n");
+            for (GitHubCommit commit : commits) {
                 List<GitHubFile> files = commit.getFiles();
                 for (GitHubFile file : files)
-                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
+                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
                             PROJECT_ID,
                             file.getName(),
                             file.getPath(),
                             commit.getSha(),
-                            String.join(", ", commit.getTags()),
+                            commit.isWeekCommit(),
                             commit.getAuthor().getEmail(),
+                            String.join(", ", commit.getTags()),
                             file.getTd(),
                             file.getComplexity(),
                             file.getLoc(),
@@ -221,11 +231,13 @@ public class InitializationService {
             FileWriter writer = new FileWriter(logFile, true);
             // header: timestamp, projectId, commits, timeElapsed
             if (logFile.length() == 0)
-                writer.append("TIMESTAMP, PROJECT, COMMITS, INIT_TIME").append("\n");
-            writer.append(String.format("%s,%s,%s,%s:%s:%s",
+                writer.append("TIMESTAMP, PROJECT, PROJECT_COMMITS, ANALYZED_COMMITS, FILTERED_COMMITS, INIT_TIME").append("\n");
+            writer.append(String.format("%s,%s,%s,%s,%s,%s:%s:%s",
                     new Timestamp(System.currentTimeMillis()),
                     this.PROJECT_ID,
-                    this.COMMITS_COUNT,
+                    this.PROJECT_COMMITS,
+                    this.ANALYZED_COMMITS,
+                    this.FILTERED_COMMITS,
                     hours,
                     minutes,
                     seconds
