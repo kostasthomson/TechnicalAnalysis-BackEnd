@@ -6,6 +6,7 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @Node("Commit")
 public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Comparable<GitHubCommit> {
@@ -32,6 +33,7 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
         this.date = date;
         this.author = author;
         this.files = files;
+        this.setTags(new ArrayList<String>());
     }
 
     public GitHubCommit(String projectId, String sha, String message, String date,
