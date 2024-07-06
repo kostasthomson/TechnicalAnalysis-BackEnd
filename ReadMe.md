@@ -27,21 +27,31 @@ software's technical debt.
 
 To set up the project locally, follow these steps:
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/kostasthomson/TechnicalAnalysis-BackEnd.git
-2. **Navigate to the project directory:**
+**Clone the repository:**
+```bash
+git clone https://github.com/kostasthomson/TechnicalAnalysis-BackEnd.git
+```
+
+## Usage
+1. **Navigate to the project directory:**
    ```bash
    cd TechnicalAnalysis-BackEnd
 
-3. **Build and run the Docker containers:**
-    ```bash
-    docker compose up --build
-
-## Usage
+2. **Build and run**
+   - **with Docker:**
+       ```bash
+       docker compose up --build
+       ```
+   - **with Maven:**
+       ```bash
+      ./mvnw spring-boot:run
+      ```
+   
 After starting the application, the following services will be available:
 
-- Spring Boot application at http://localhost:8085
+- Spring Boot application at 
+  - http://localhost:8085 (Docker)
+  - http://localhost:8080 (Maven)
 - SonarQube server at http://localhost:9952
 - Neo4j database at http://localhost:7474
 - PostgreSQL database (used by SonarQube)
