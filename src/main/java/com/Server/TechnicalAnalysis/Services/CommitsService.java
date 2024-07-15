@@ -31,10 +31,9 @@ public class CommitsService {
         int firstIndex = 0;
         for (int i = 0; i < storedCommits.size(); i++) {
             GitHubCommit currentCommit = storedCommits.get(i);
-            if (currentCommit.isWeekCommit()) {
-                response.add(new GroupedCommitsResponse(currentCommit.getDate(), new GitHubCommitList().addAll(storedCommits.subList(firstIndex, i + 1))));
-                firstIndex = i + 1;
-            }
+            if (!currentCommit.isWeekCommit()) continue;
+            response.add(new GroupedCommitsResponse(currentCommit.getDate(), new GitHubCommitList().addAll(storedCommits.subList(firstIndex, i + 1))));
+            firstIndex = i + 1;
         }
         return response;
     }
