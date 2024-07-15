@@ -29,6 +29,6 @@ public class ProjectController {
     public void deleteProject(@RequestParam String projectName, HttpServletResponse response) {
         int status = this.service.deleteProject(projectName);
         if (status != 0) response.setStatus(status);
-        response.setStatus(200);
+        else response.setStatus(200);
     }
 }

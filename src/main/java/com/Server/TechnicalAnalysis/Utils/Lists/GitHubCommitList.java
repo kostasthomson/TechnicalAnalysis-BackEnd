@@ -40,10 +40,10 @@ public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
     }
 
     public List<Integer> filterPerWeek() {
-        this.weekIndexes.add(list.size()-1); // adding last commit's index as starting reference point
+        this.weekIndexes.add(list.size() - 1); // adding last commit's index as starting reference point
         LocalDate firstDate = LocalDate.parse(list.get(this.weekIndexes.get(0)).getDate(), DateTimeFormatter.ISO_DATE_TIME);
         LocalDate endOfWeek = firstDate.minusWeeks(1);
-        int i = this.weekIndexes.get(0)-1;
+        int i = this.weekIndexes.get(0) - 1;
         LocalDate currentDate;
         while (i >= 0) {
             currentDate = LocalDate.parse(list.get(i).getDate(), DateTimeFormatter.ISO_DATE_TIME);
@@ -70,6 +70,12 @@ public class GitHubCommitList extends GitHubEntityCollection<GitHubCommit> {
     }
 
     public void filterFilesWithMetrics() {
-        list = new ArrayList<>(this.stream().filter(GitHubCommit::hasFileMetrics).toList());
+        int i = 0;
+        while (i < list.size()) {
+            GitHubCommit commit = list.get(i);
+            commit.filterFilesWithMetrics();
+            if (commit.getFiles().isEmpty()) list.remove(i);
+            else i++;
+        }
     }
 }

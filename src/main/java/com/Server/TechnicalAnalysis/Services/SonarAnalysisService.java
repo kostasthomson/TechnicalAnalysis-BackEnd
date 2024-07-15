@@ -206,26 +206,35 @@ public class SonarAnalysisService {
             JSONObject component = (JSONObject) object;
             objMap.put(component.get("path").toString(), component);
         }
-        files.forEach((key, list) ->
-                list.forEach(file ->
-                        this.populateMetricsFromComponent(file, objMap.get(key))
-                )
-        );
+        files.forEach((key, list) -> list.forEach(file -> this.populateMetricsFromComponent(file, objMap.get(key))));
+    }
+
+    private HttpResponse<JsonNode> makeRequest(int p, int ps) throws Exception {
+        HttpResponse<JsonNode> jsonNode;
+        jsonNode = httpController.getRequest(new HttpControllerService.HttpRequest()
+                .setUrl(this.sonarQubeUrl + "/api/measures/component_tree")
+                .setParam("component", this.projectOwner + ":" + this.repoName)
+                .setParam("metricKeys", "sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines")
+                .setParam("ps", String.valueOf(ps))
+                .setParam("p", String.valueOf(p))
+                .setAuth(this.sonarQubeUser, this.sonarQubePassword));
+        if (Objects.isNull(jsonNode) || jsonNode.getStatus() != 200) throw new Exception("Request failed");
+        return jsonNode;
     }
 
     private void getMetricsFromSonarQube(HashMap<String, List<GitHubFile>> files) {
         try {
+            int filesPerPage = 500;
+            int numOfPages = (files.size() / filesPerPage) + 1;
             Unirest.setTimeouts(0, 0);
-            HttpResponse<JsonNode> jsonNode = httpController.getRequest(new HttpControllerService.HttpRequest()
-                    .setUrl(this.sonarQubeUrl + "/api/measures/component_tree")
-                    .setParam("component", this.projectOwner + ":" + this.repoName)
-                    .setParam("metricKeys", "sqale_index,complexity,ncloc,code_smells,files,functions,comment_lines")
-                    .setAuth(this.sonarQubeUser, this.sonarQubePassword));
-            if (Objects.isNull(jsonNode) || jsonNode.getStatus() != 200) throw new Exception("Request failed");
+            HttpResponse<JsonNode> jsonNode = this.makeRequest(1, filesPerPage);
             this.populateMetricsFromComponent(commit, (JSONObject) jsonNode.getBody().getObject().get("baseComponent"));
             this.populateFileMetrics(files, (JSONArray) jsonNode.getBody().getObject().get("components"));
-        } catch (
-                Exception e) {
+            for (int i = 2; i <= numOfPages; i++) {
+                HttpResponse<JsonNode> tmpNode = this.makeRequest(i, filesPerPage);
+                this.populateFileMetrics(files, (JSONArray) tmpNode.getBody().getObject().get("components"));
+            }
+        } catch (Exception e) {
             this.logger.error(e.getMessage(), e);
         }
     }

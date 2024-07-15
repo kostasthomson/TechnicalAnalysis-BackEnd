@@ -1,5 +1,7 @@
 package com.Server.TechnicalAnalysis.Models;
 
+import java.util.Objects;
+
 public abstract class GitHubMetricEntity {
     protected Integer complexity;
     protected Integer loc;
@@ -66,34 +68,34 @@ public abstract class GitHubMetricEntity {
     }
 
     protected boolean hasMetrics() {
-        return td != null &&
-                complexity != null &&
-                loc != null &&
-                numFiles != null &&
-                functions != null &&
-                commentLines != null &&
-                codeSmells != null;
+        return this.hasTd() && this.hasComplexity() && this.hasLoc() && this.hasNumFiles() && this.hasFunctions() && this.hasCommentLines() && this.hasCodeSmells();
     }
 
     public boolean hasComplexity() {
-        return this.complexity != null;
+        return Objects.nonNull(this.complexity);
     }
+
     public boolean hasLoc() {
-        return this.loc != null;
+        return Objects.nonNull(this.loc);
     }
+
     public boolean hasTd() {
-        return this.td != null;
+        return Objects.nonNull(this.td);
     }
+
     public boolean hasNumFiles() {
-        return this.numFiles != null;
+        return Objects.nonNull(this.numFiles);
     }
+
     public boolean hasFunctions() {
-        return this.functions != null;
+        return Objects.nonNull(this.functions);
     }
+
     public boolean hasCommentLines() {
-        return this.commentLines != null;
+        return Objects.nonNull(this.commentLines);
     }
+
     public boolean hasCodeSmells() {
-        return this.codeSmells != null;
+        return Objects.nonNull(this.codeSmells);
     }
 }

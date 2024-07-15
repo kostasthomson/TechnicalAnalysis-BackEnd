@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.List;
 
 @Service
@@ -45,6 +46,8 @@ public class ProjectService {
         );
         if (controllerResponse.getStatus() != 204) return controllerResponse.getStatus();
         repository.deleteByName(projectName.replace(":", "/"));
+        File projectReportFile = new File(projectName.replace("/", "_")+".csv");
+        if (!projectReportFile.delete()) return 500;
         return 0;
     }
 }
