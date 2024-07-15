@@ -156,34 +156,30 @@ public class InitializationService {
         try (BufferedReader bufferedReader = this.gitCLI.LogCommits()) {
             List<List<String>> commitsLogList = this.gitLogReader.readCommits(bufferedReader);
             commits = this.gitLogInterpreter.createCommitsList(commitsLogList, PROJECT_ID);
+            this.PROJECT_COMMITS = commits.size();
             weekIndexes = commits.filterPerWeek();
+            this.ANALYZED_COMMITS = weekIndexes.size();
         } catch (IOException e) {
             logger.error("IOException Commits error: {}", e.getMessage());
             return;
         }
 
-        this.ANALYZED_COMMITS = weekIndexes.size();
-        this.PROJECT_COMMITS = commits.size();
-
-        // analyze repo
-        this.analyzeCommits(commits, weekIndexes);
-
-        int unfiltered = commits.size();
-
-        // filter commits
-        commits.filterFilesWithMetrics();
-
-        this.FILTERED_COMMITS = commits.size();
-
-        this.logger.warn("unfiltered: {} | week: {} | filtered {}", unfiltered, weekIndexes.size(), commits.size());
-
-        // Save entities
-        this.collaboratorRepository.saveAll(collaborators);
-        GitHubCommit latestCommit = commits.getLatest();
-        this.projectRepository.save(new GitHubProject(latestCommit.getProjectName(), collaborators, latestCommit, commits.findMaxFileTd()));
-        this.commitRepository.saveAll(commits);
 
         try {
+            // analyze repo
+            this.analyzeCommits(commits, weekIndexes);
+            // filter commits
+            commits.filterFilesWithMetrics();
+
+            this.FILTERED_COMMITS = commits.size();
+            this.logger.warn("unfiltered: {} | week: {} | filtered {}", this.PROJECT_COMMITS, this.ANALYZED_COMMITS, this.FILTERED_COMMITS);
+
+            // Save entities
+            this.collaboratorRepository.saveAll(collaborators);
+            GitHubCommit latestCommit = commits.getLatest();
+            this.projectRepository.save(new GitHubProject(latestCommit.getProjectName(), collaborators, latestCommit, commits.findMaxFileTd()));
+            this.commitRepository.saveAll(commits);
+
             File analysisFile = new File(repositoryOwner + "_" + repositoryName + ".csv");
             FileWriter writer = new FileWriter(analysisFile, true);
             // header: project_name; file; package (relative path); sha; tag; contributor; sqale_index; ncloc; code_smells; files; functions; comment_lines; td->td_min
@@ -210,12 +206,16 @@ public class InitializationService {
                     )).append("\n");
             }
             writer.close();
+
+            // Delete cloned repository directory
+            this.addLogResults(start, Instant.now(), link);
         } catch (IOException e) {
             this.logger.error("Results logging failed");
+        } catch (Exception e) {
+            this.logger.error("Unexpected error: {}", e.getMessage());
+        } finally {
+            this.resetApplication();
         }
-        // Delete cloned repository directory
-        this.resetApplication();
-        this.addLogResults(start, Instant.now(), link);
     }
 
     private void addLogResults(Instant start, Instant end, String link) {

@@ -5,8 +5,8 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Node("Commit")
 public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Comparable<GitHubCommit> {
@@ -33,7 +33,7 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
         this.date = date;
         this.author = author;
         this.files = files;
-        this.setTags(new ArrayList<String>());
+        this.setTags(new ArrayList<>());
     }
 
     public GitHubCommit(String projectId, String sha, String message, String date,
@@ -61,7 +61,7 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
 
     @Override
     public String toString() {
-        return "Commit:\n\t\tsha:" + this.sha + "\n\t\tdate:" + this.date + "\n\t\tfiles:" + this.files;
+        return "\nCommit:\n\t\tsha:" + this.sha + "\n\t\tdate:" + this.date + "\n\t\tfiles:" + this.files;
     }
 
     public String getProjectName() {
@@ -129,12 +129,7 @@ public class GitHubCommit extends GitHubMetricEntity implements GitHubEntity, Co
         return this.isWeekCommit;
     }
 
-    public boolean hasFileMetrics() {
-        for (GitHubFile file : this.files) {
-            if (!file.hasMetrics()) {
-                return false;
-            }
-        }
-        return true;
+    public void filterFilesWithMetrics() {
+        this.files = new ArrayList<>(this.files.stream().filter(GitHubFile::hasMetrics).toList());
     }
 }
